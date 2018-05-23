@@ -1,0 +1,94 @@
+\documentclass[sigconf]{acmart}
+
+\usepackage{tabularx}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{natbib}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{mathtools}
+\usetikzlibrary{chains,fit,shapes,calc}
+\usepackage{verbatim}
+\usepackage{semantic}
+\usepackage[T1]{fontenc}
+\usepackage{tabu}
+\usepackage{amsthm}
+\usepackage{mathptmx}
+\usepackage{todonotes}
+\usepackage{listings,lstcoq}
+\usepackage{ucs}
+\lstset{language=Coq,
+        inputpath=code
+       }
+%\newcommand{\concat}{\ensuremath{+\!\!\!\!+\,}}  
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Corollary}[theorem]
+\newtheorem{lemma}{Lemma}[theorem]
+\newenvironment{proofoutline}
+ {\renewcommand\qedsymbol{}\proof[Proof outline]}
+ {\endproof}
+
+\begin{document}
+\acmConference[IFL'18]{International Symposium on Implementation and Application of Functional Languages}{August 2019}{Lowell, MA, USA}
+\acmYear{2018}
+
+\copyrightyear{2018}
+\acmJournal{PACMPL}
+\acmVolume{1}
+\acmNumber{IFL} % CONF = POPL or ICFP or OOPSLA
+\acmArticle{1}
+\acmMonth{1}
+\acmDOI{} % \acmDOI{10.1145/nnnnnnn.nnnnnnn}
+\startPage{1}
+
+%\titlebanner{Preprint}        % These are ignored unless
+
+\title{Verifiably Lazy}
+\subtitle{Verified Compilation of Call-by-Need}
+
+\author{George Stelle}
+\affiliation{
+%%  \position{Scientist}
+%%  \department{CCS-7}              %% \department is recommended
+  \institution{Los Alamos National Laboratory}            %% \institution is required
+  \streetaddress{Bikini Atoll Rd., SM 30}
+  \city{Los Alamos}
+  \state{New Mexico}
+  \postcode{87545}
+  \country{United States}                    %% \country is recommended
+}
+\email{stelleg@lanl.gov}          %% \email is recommended
+
+\author{Darko Stefanovic}
+\affiliation{
+%%  \position{Professor and Chair}
+%%  \department{Computer Science}              %% \department is recommended
+  \institution{University of New Mexico}            %% \institution is required
+  \streetaddress{1 University of New Mexico}
+  \city{Albuquerque}
+  \state{New Mexico}
+  \postcode{87131}
+  \country{United States}                    %% \country is recommended
+}
+\email{darko@unm.edu}          %% \email is recommended
+
+\maketitle
+
+\begin{abstract}
+\input{abstract}
+\end{abstract}
+
+\input{intro}
+\input{background}
+\input{cem}
+\input{cesm}
+\input{im}
+\input{discussion}
+\input{conclusion}
+
+% We recommend abbrvnat bibliography style.
+\bibliographystyle{abbrvnat}
+\bibliography{annotated}
+
+\end{document}

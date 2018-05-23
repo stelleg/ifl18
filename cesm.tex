@@ -1,0 +1,50 @@
+\section{Small Step Source Semantics}
+
+In this section we discuss the small step semantics, and show that they
+implement the big step semantics of Section~\ref{cem}. This is a fairly
+straightforward transformation implemented by adding a stack. The source
+langauge is the same, and we simply add a stack to our configuration. The stack
+elements are either argument closures or update markers. Update markers are
+pushed onto the stack when a variable dereferences a location in the heap.
+Argument closures are pushed onto the stack by applications, with the same
+environment pointer duplicated in the current closure and the argument closure. 
+The semantics are defined in Figure~\ref{fig:cesm}.  
+
+Note that the presentation given here differs slightly from previous
+presentations \cite{cem}, which inlined the lookup into the machine steps. This
+is to simplify formalization and relation to the big step semantics, but doesn't
+change the semantics of the machine. As a tradeoff, it does make the relation to
+the instruction machine in the later sections very slightly more involved, but
+it is generally a superficial change.
+
+\subsection{Relation to Big Step}
+Here we prove that the small step semantics implement the big step semantics of
+Section~\ref{cem}. This requires first a notion of reflexive transitive closure,
+which we define in the standard way. We also make use of the fact that the
+reflexive transitive closure can be defined equivilantly to extend from the left
+or right. 
+
+\begin{lemma}
+If the big step semantics evaluates from one configuration to another, then the
+reflexive transitive closure of the small step semantics evaluates from the same
+starting configuration with any stack to the same value configuration with that
+same stack.
+\end{lemma}
+\begin{proofoutline}
+The proof proceeds by induction on the big step relation. We define our
+induction hypothesis so that it holds for all stacks, which gives us the
+desired case of the empty stack as a simple specialization. The rule for
+abstractions is the trivial base case. Var rule applies as the first step, and
+the induction hypothesis applies to the stack with the update marker on it. To
+ensure the Upd rule applies we use the fact that the bigstep only evaluates to
+values terms, and the fact that the reflexive transitive closure can be
+rewritten with steps on the right. For the Application rule, we take advantage
+of the fact that we can append two evaluations together, as well as extend a
+closure from the front or the rear. As with the Var rule we use the the fact
+that the induction rule is defined for all stacks to ensure we evaluate the left
+hand side to a value with the argument on the top of the stack.  Finally, we
+extend the environment with the argument closure, and evaluate the result to a
+value by the second induction hypothesis.   
+\end{proofoutline}
+
+

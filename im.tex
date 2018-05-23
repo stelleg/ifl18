@@ -1,0 +1,123 @@
+\section{Instruction Machine}
+
+Here we describe in full the instruction machine target. We choose a simple
+stack machine with a Harvard architecture, with separate instruction and
+data memory. We use natural numbers for pointers, though it shouldn't be too
+difficult to replace these with standard-sized machine words, e.g. 64 bits,
+along with making the stack and malloc operations partial. Our stack is
+represented as a list of pointers, though again it should be a relatively
+straightforward exercise to represent the stack in main memory. As with the
+machine word size, we'd need to make push operations partial to represent stacks
+this way. We define our machine to have only 4 registers: an instruction
+pointer, an environment pointer, and two scratch registers. Our instruction set
+is minimal, consisting only of a conditional \texttt{jump} instruction,
+\texttt{pop} and \texttt{push} instructions, a \texttt{mov} instruction, and a
+\texttt{new} instruction for allocating new memory. Note that for our program
+memory, we have pointers to basic blocks, but for simplicity of proofs we choose
+to not to point to increment the instruction pointer within a basic block.
+Instead, the instruction pointer is constant within a basic block, only
+changing between basic blocks. In fact, we actually represent the program as a
+list of basic blocks, with pointers indexing into the list. This has the
+advantage of being able to reason about sublists and their relation to terms. As
+with other design decisions, this also should be fairly unproblematic for
+formalization to a more realistic hardware design. The full syntax of the
+machine is given in Figure~\ref{fig:im_syntax}.  
+
+The machine semantics should be unsurprising. The \texttt{push} instruction
+takes a read operand and pushes it onto the stack. The \texttt{pop} instruction
+pops the top of the stack into a write operand. The \texttt{mov} instruction
+moves a machine word from a read operand to a write operand. The \texttt{jump}
+instruction is parameterized by an optional pair, which if present, reads 
+the first element of the pair from a read operand, checks if it is zero, and if
+so sets the ip to the second element of the pair, which is a constant pointer. If the
+condition is not zero, then it sets the ip to the instruction pointer contained
+in the second jump argument. If we pass nothing as the first argument, then it
+becomes an unconditional set of the ip to the value read from the second argument.
+Note that the second argument is a read operand, so can either be a constant or
+read from a register or memory. This means it can be effectively either a direct
+or indirect jump, both of which are used in the compilation of lambda terms. The
+\texttt{new} instruction allocates a contiguous block of new memory and writes
+the result into a write operand. We take the approach of not choosing a
+particular allocation strategy. Instead, we parameterize our proof on the
+existence of such functionality. For simplicity, we assume that the allocation
+function returns completely fresh memory, though it should be possible to modify
+this assumption to be less restrictive, i.e. let it re-use heap locations that
+are no-longer live. The complete semantics of the machine are given in
+Figure~\ref{im_semantics}. Note that we separate instruction steps and basic
+block steps. A basic block is a sequence of instructions that ends with a jump,
+which will set the IP to the next basic block to be evaluated. The full out step
+function will lookup the basic block at that IP, and if the basicblock will
+evaluate to a new state, then the machine will also evaluate to that state. 
+
+\subsection{Relation to Small Step Source Semantics}
+
+Here we define a relation between the state of the small step semantics and the
+state of the instruction machine semantics, and show that the instruction
+machine implements the small step source semantics under that relation. 
+
+In general, we implement closures as instruction pointer, environment pointer
+pairs. For the instruction pointers, we relate them to terms via the compile
+function defined in Section~\ref{compiler}. Essentially, we require that the
+instruction pointer point to a list of basic blocks that the related term
+compiles to. For the current closure, we relate the instruction pointer in the
+instruction machine to the current term in the small step source semantics. The
+environment pointers of each machine are more similar. Given a relation between
+the heaps of the two machines, we define the relation between two environment
+pointers as existing in the relation of the heaps, or both being the null
+pointers. While it should be possible to avoid this special case, during the
+proof it became apparent that not having the special case made the proof
+significantly harder. This forces us to add the constraint to all machines that
+pointers are non-null, which for real hardware shouldn't be an issue.  
+
+It's important to point out that we use null pointers in two crucial ways. One
+is to explicitly define the root of the shared environment structure in both the
+source semantics and the machine semantics. The next is for instruction
+pointers. To differentiate between update markers and pointers to basic blocks,
+we use a null pointer to refer to an update marker, and a non-null pointer as an
+instruction pointer for an argument closure. Note that in fact, while the null
+pointers in heaps required us to only allocate non-null fresh locations in the
+heaps of our semantics, using null pointers to denote update markers requires no
+change to our program generation, due to the fact that an argument term of an
+application cannot occur at position 0 in the program.
+
+The relation between the heaps of the small step source semantics and the
+instruction machine is the trickiest part of the state relation. Note that for
+each location in the source semantics heap, we have a cell with a closure and
+environment continuation pointer. Naturally, the instruction machine represents
+these as three pointers: two for the closure (the instruction pointer and
+environment pointer) and one for the environment continuation. The easiest
+approach turned out to use the structure of the heap constructs to define a
+one-to-three mapping between this single cell and the three machine words. The
+structure used for the each of the heaps is a list of pointer, value bindings.
+We use the ordering of these bindings in the list to define a one binding to
+three binding mapping between the source heap and the machine heap. We define an
+analogue to the standard \texttt{In} list relation that defines when an element
+is in a list for this heap relation, proceeding recursively on the inductive
+relation structure. This allows us to define a notion of which pairs of each
+type of closure are in the heap, along with their respective locations. Due to
+the ordering that they are allocated in the heap during evaluation, each pair of
+memory allocations corresponds to an equivalent closure. We use this property as
+as a kind of heap equivalence property that is preserved through evaluation:
+every binding pair in the heap relation property described above defines
+equivalent closures and environment continuations. For the relation between our
+stacks, we define a similar notion: we require that every update marker points
+to related environments: they are two pointers that exist in the heap relation,
+and that every closure is equivalent: the instruction pointer and environment
+pointer are equivalent to their respective counterparts in the small step
+semantics. 
+
+In summary, we require that the current closure in the small step semantics is
+equivalent to the closure represented by the instruction pointer, environment
+pointer pair, and that the stacks and the heaps are equivalent.  
+
+Now that we have our relation between heaps, we can state our primary lemma.
+\begin{lemma}
+Given that an instruction machine state $i$ is related to a small step
+semantics state $s$, and that small step semantics state steps to a new state
+$s'$, the instruction machine will step in zero or more steps to a related state
+$i'$.
+\end{lemma}
+\begin{proofoutline}
+Our proof proceeds by case analysis on the step rules for the small step
+semantics. For the Var rule, because we need to update  
+\end{proofoutline}

@@ -1,0 +1,78 @@
+\section{Source Semantics} \label{cem_big}
+
+In this section we define with our big step source semantics. Big step semantics
+have the advantage of powerful, easy to use induction properties. This eases
+reasoning about many program properties. We'll also define a small step
+semantics and prove that it implements the big step semantics, but by showing
+that our implementation preserves the big-step semantics, we prove preservation
+of any inductive reasoning on the structure of evaluation tree.  
+
+As discussed in Section~\ref{intro}, our source semantics is lambda calculus
+with deBruijn indices. 
+\begin{align*}
+ t &::= t \; t \; | \; x \; | \;  \lambda \; t \\
+ x &\in \mathbb{N}
+\end{align*}
+The essence of the $\mathcal{CE}$ semantics is that we implement a shared
+environment, and use its structure to share results of computations. This allows
+for a simple abstract machine which can operate on lambda calculus directly,
+preventing needing to reason about lambda lifting and indirections due to
+closure size changes. We operate on closures, which combine terms with
+pointers into the shared environment, which is implemented as a heap. Every
+heap location points to a cell, which contains a closure and a pointer to the
+next environment location if necessary. Variable dereferences index into this
+shared environment structure, while the binding of a new variable extends the
+shared environment structure with a new cell. Applications evaluate the left
+hand side to an abstraction, then extend the environment with the argument term
+closed under the environment pointer at the environment of the application. The
+application rule enforces the fact that two variables bound to the same argument
+closure will point to the same location in the shared environment. Because the
+point to the same location by construction of the shared environment, we can use
+this property to update that location with the value computed at the first
+variable dereference, and then each subsequent dereference will point to this
+value. The variable rule applies the update by indexing into the shared
+environment structure and replacing the closure at that location with the
+resulting value. The big step semantics are described in the standard way by
+logical relation in Figure~\ref{bigstep}. 
+
+In addition to the above description there are some important properties to
+notice for the purpose of verification. One is that we specify that in addition
+to requiring that a heap location for a new bound closure is fresh, we require
+that the it is positive. While not necessary for the correctness of the
+semantics, this will be useful later when defining a relation between the heap
+described here and the machine code heap, ensuring that we don't artificially
+extend the empty environment. It's also worth noting that while the closures in
+the heap cells are mutable, the shared environment structure is never mutated.
+This property is crucial when reasoning about variable dereferences. 
+
+The astute reader will notice that the freshness constraint is also stronger
+than necessary. In reality, we'd like to have a notion of liveness and heap
+re-use.  We'll return to this in Section~\ref{discussion} with an informal
+argument that this should be possible in future work. For this paper, this
+simpler property helps simplify reasoning about correctness.  
+
+The fact that our natural semantics are defined on lambda calculus with deBruijn
+tindices differs from existing definitions of call-by-need, such as Ariola's
+call-by-need \cite{ariola} or Launchbury's lazy semantics \cite{launchbury}.
+These semantics are defined on lambda calculus with named variables. While it
+should be possible to relate our semantics to these \footnote{Both of these well
+known existing semantics have known bugs, as discussed in
+Section~\ref{discussion}}, it is certainly made more difficult by this
+disparity. A more fruitful relation to semantics operating on lambda calculus
+with named variables would likely be relating curiens calculus of closures to
+call-by-name semanticss implemented with substitution. We'll return to this
+discussion in Section~\ref{discussion}.
+
+As mentioned in Section~\ref{intro}, these big step semantics don't explicitly
+include a notion of nontermination. Instead, nontermination would be implied by
+the negation of the existence of an evaluation relation. This prevents reasoning
+directly about nontermination in an inductive way, but for our the purpose of
+our primary lemma this is fine. 
+
+One interesting property of defining an inductive evaluation relation in a
+language like Coq is that we can do computation on the evaluation tree. In other
+words, the evaluation relation given above defines a data type, one that we can
+do computation on in standard ways. For example, we could potentially compute
+properties like size and depth, which would be related to operational properties
+of compiled code. We hope in future work to explore this approach further.
+
