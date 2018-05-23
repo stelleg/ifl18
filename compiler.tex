@@ -1,5 +1,46 @@
 \section{Compiler} \label{sec:compiler}
 
-In this section we describe the compiler, which compiles lambda terms to
-programs. Recall that a program maps instruction pointers to basic blocks, which
-are described. 
+In this section we describe the assembly language and the compiler. Our assembly
+language is a simple one, consisting of 
+
+\begin{figure}
+\begin{lstlisting}
+Fixpoint var_inst (i : nat) : BasicBlock := match i with
+  | 0 => push EP ;
+         push (RC 0) ;
+         mov (EP%0) R1 ;
+         mov (EP%1) EP ;
+         jump None R1
+  | S i => mov (EP%2) EP ;
+           var_inst i
+  end.
+
+Fixpoint compile (t : tm) (k : nat) : Program := match t with
+  | var v => [var_inst v]
+  | app m n => let ms := compile m (1+k) in
+               let nk := 1+k+length ms in
+                push EP ;
+                push (RC nk) ;
+                jump None (RC (1+k)) ::
+                ms ++
+                compile n nk
+  | lam b => pop R1 ;
+             jump (Some (RW (WR R1), (1+k))) (RC (2+k)) ::
+             (*Update*)
+             pop R1 ;
+             mov (RC k) (R1%0) ;
+             mov EP (R1%1) ;
+             jump None (RC k) ::
+             (*Take*)
+             new 3 R2 ;
+             mov R1 (R2%0);
+             pop (R2%1) ;
+             mov EP (R2%2) ;
+             mov R2 EP ;
+             jump None (3+k) ::
+             compile b (3+k)
+  end. 
+\end{lstlisting}
+\caption{Compiler Definition}
+\label{fig:compiler}
+\end{figure}

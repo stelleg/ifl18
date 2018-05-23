@@ -1,4 +1,4 @@
-\section{Introduction}
+\section{Introduction} \label{sec:introduction}
 Call-by-need semantics are heavily relied on in languages like Haskell to ensure
 efficient execution of non-strict semantics. These semantics let programmers
 focus more on the correctness and composability of their code, without worrying
@@ -33,48 +33,32 @@ of closures. Combining these results shows that the compiler correctly
 implements both call-by-name and call-by-need.
 
 It may surprise the reader to see that we don't start with a well-known
-call-by-need semantics; we address this concern in in Section~\ref{discussion}.
+call-by-need semantics; we address this concern in in Section~\ref{sec:discussion}.
 To convince ourselves and the reader that we are correctly implementing
 call-by-need, we state and prove the crucial property of call-by-need explicitly
 as a Lemma: any bound closure will be evaluated at most once. This, combined
-with the proof that we implement Curien's call-by-name semantics should convince
-any reader that we have indeed implemented a call-by-need semantics, despite not
-using an well-known definition of call-by-need. 
+with the proof that we our call-by-name version of the semantics implements
+Curien's call-by-name semantics, should hopefully convince the reader that we
+have indeed implemented a call-by-need semantics, despite not using an
+well-known definition of call-by-need. 
 
-Our compiler target is a simple assembly language and corresponding instruction
-machine, similar to that used in \cite{chlipala_verified}. 
-\begin{figure}
-\begin{align*}
-  \tag{Word}   n, p &\in \mathbb{N} \\
-  \tag{Registers} r &::= ip \; | \; ep \; | \; r1 \; | \; r2  \\
-  \tag{Write Operands}  wo &::= r \; | \; r\%n \\
-  \tag{Read Operands}  ro &::= wo \; | \; n \\
-  \tag{Basic Blocks} bb &::= i \; ; \; bb \; 
-                       | \; \texttt{jmp} \; \{(ro, n)\} \; ro \;  \\
-  \tag{Instructions} i &::= \texttt{mov} \; ro \; wo \; 
-                       | \; \texttt{new} \; n \; wo \; \\
-  \notag   & \quad \;  | \; \texttt{push} \; ro \; 
-                       | \; \texttt{pop} \; wo 
-\end{align*}
-\label{fig:im_syntax}
-\caption{Instruction Set Syntax}
-\end{figure}
 This simple target allows us to describe the compiler and proofs in a concise
 way for the paper, while still allowing flexibility in eventually verifying a
 compiler down to machine code for some real hardware, e.g. x64.
 
-The paper is structured as follows. In Section~\ref{background} we give the
-necessary background for the paper. In Section~\ref{cem_big} we describe the
+The paper is structured as follows. In Section~\ref{sec:background} we give the
+necessary background for the paper. In Section~\ref{sec:cem_big} we describe the
 source syntax and semantics (the big-step $\mathcal{CE}$ semantics) in detail.
-In Section~\ref{cem_small} we describe the small step $\mathcal{CE}$ semantics
-and their relation to the big-step semantics.  In Section~\ref{im} we describe
-the instruction machine syntax and semantics. In Section~\ref{db_assembly} we
-describe the compilation from machine terms to assembly language, i.e. the
-compiler. In Section~\ref{im_semantics} we describe the instruction machine
-semantics, and show how evaluation of compiled programs is related to the small
-step $\mathcal{CE}$ semantics. the compilation of terms into assembly language,
-and the instruction machine semantics. In Section~\ref{discussion} we discuss
-threats to validity, future work, and related work. Finally, we conclude in
-Section~\ref{conclusion}.
+We also use this section to define a call-by-name version of the semantics, and
+show that it implements Curien's calculus of closures \cite{curien}.  In
+Section~\ref{sec:cem_small} we describe the small step $\mathcal{CE}$ semantics and
+their relation to the big-step semantics. In Section~\ref{sec:compiler} we describe
+the compilation from machine terms to assembly language, i.e. the compiler. In
+Section~\ref{sec:im_semantics} we describe the instruction machine syntax and
+semantics, and describe how evaluation of compiled programs is related to the
+small step $\mathcal{CE}$ semantics. the compilation of terms into assembly
+language, and the instruction machine semantics. In Section~\ref{sec:discussion} we
+discuss threats to validity, future work, and related work. Finally, we conclude
+in Section~\ref{sec:conclusion}.
 
 

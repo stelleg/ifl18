@@ -10,16 +10,16 @@
 \usetikzlibrary{chains,fit,shapes,calc}
 \usepackage{verbatim}
 \usepackage{semantic}
+\usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{tabu}
 \usepackage{amsthm}
 \usepackage{mathptmx}
-\usepackage{todonotes}
-\usepackage{listings,lstcoq}
-\usepackage{ucs}
-\lstset{language=Coq,
-        inputpath=code
-       }
+%\usepackage{todonotes}
+\usepackage{listingsutf8,lstcoq}
+%\usepackage{inconsolata}
+%\usepackage{ucs}
+\lstset{language=Coq}
 %\newcommand{\concat}{\ensuremath{+\!\!\!\!+\,}}  
 
 \newtheorem{theorem}{Theorem}[section]
@@ -83,6 +83,7 @@
 \input{background}
 \input{cem}
 \input{cesm}
+\input{compiler}
 \input{im}
 \input{discussion}
 \input{conclusion}

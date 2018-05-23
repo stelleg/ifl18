@@ -33,7 +33,36 @@ variable dereference, and then each subsequent dereference will point to this
 value. The variable rule applies the update by indexing into the shared
 environment structure and replacing the closure at that location with the
 resulting value. The big step semantics are described in the standard way by
-logical relation in Figure~\ref{bigstep}. 
+logical relation in Figure~\ref{fig:bigstep}. The \texttt{update $\Psi$ x v}
+function replaces the closure at location \texttt{x} in heap $\Psi$ with value
+\texttt{v}. The curly brackets construct a heap cell containing a closure and a
+environment continuation. The \texttt{app} constructor represents an application,
+while the \texttt{var} constructor is a variable constructor and $\lambda$ is
+the constructor for an abstraction. The \texttt{clu} function looks up a
+variable index in the shared environment structure by following environment
+continuation pointers.  The $\langle \Phi \rangle \texttt{c}$ notation
+constructs a configuration from a heap $\Phi$ and a closure \texttt{c}. Note
+that we require that fresh variables are greater than zero. This is required
+for reasoning about compilation to the instruction machine, which we will
+return to in Section~\ref{sec:im}.
+
+\begin{figure}
+\begin{lstlisting}
+Inductive step : conf -> conf -> Type :=
+  | Id : forall M x y z $\Phi$ $\Psi$ v e, clu y e $\Phi$ = Some (x, {M, z}) -> 
+                    $\langle$$\Phi$$\rangle$M $\Downarrow$ $\langle$$\Psi$$\rangle$v ->
+      $\langle$$\Phi$$\rangle$close (var y) e $\Downarrow$ $\langle$update $\Psi$ x v$\rangle$v
+  | Abs : forall N $\Phi$ e, $\langle$$\Phi$$\rangle$close ($\lambda$N) e $\Downarrow$ $\langle$$\Phi$$\rangle$close ($\lambda$N) e
+  | App : forall N M B B' $\Phi$ $\Psi$ $\Upsilon$ f e ne ae, isfresh (domain $\Psi$) f -> 
+                            f > 0 ->
+          $\langle$$\Phi$$\rangle$close M e $\Downarrow$ $\langle$$\Psi$$\rangle$close ($\lambda$B) ne -> 
+      $\langle$$\Psi$, f ↦ {close N e, ne}$\rangle$close B f $\Downarrow$ $\langle$$\Upsilon$$\rangle$close ($\lambda$B') ae   ->
+              $\langle$$\Phi$$\rangle$close (app M N) e $\Downarrow$ $\langle$$\Upsilon$$\rangle$close ($\lambda$B') ae
+where " c1 '$\Downarrow$' c2 " := (step c1 c2).
+\end{lstlisting}
+\caption{Big Step Semantics}
+\label{fig:bigstep}
+\end{figure}
 
 In addition to the above description there are some important properties to
 notice for the purpose of verification. One is that we specify that in addition
@@ -76,3 +105,90 @@ do computation on in standard ways. For example, we could potentially compute
 properties like size and depth, which would be related to operational properties
 of compiled code. We hope in future work to explore this approach further.
 
+\subsection{Call-By-Name}
+
+In this section we define a call-by-name variant of our big step semantics and
+prove that it is an implementation of Curien's call-by-name calculus of
+closures \cite{curien}. 
+
+See Figure~\ref{fig:bigstepname} for the definition of our call-by-name
+semantics. Note that the only change from our call-by-need semantics is that we
+don't update the heap location with the result of the dereferenced computation.
+This is the essence of the difference between call-by-name and call-by-need.
+
+A well known existing call-by-name semantics is Curien's calculus of closures
+\cite{curien}. Refer to Figure~\ref{fig:curien} for a formalization of this
+semantics. This semantics defines closures as a term, environment pair, where an
+environment is a list of closures. Abstractions are in weak head normal form,
+variables index into the environment using the \texttt{nth\_error} standard
+library function, and applications evaluate the left hand side to a value, then
+extend the environment of the value with the closure of the argument. 
+
+We define a heterogeneous equivalence relation between our shared environment
+structure and Curien's structure. Effectively, this relation is the claim that
+the shared environment structure is a linked list implementation of the
+environment list in Curien's semantics. This is defined inductively, and we
+require that every closure reachable in the environment is also equivalent.  We
+say two closures are equivalent if their terms are identical and their
+environments are equivalent. 
+
+Given these definitions, we can prove that our call-by-name semantics implement
+Curien's call by name semantics: 
+
+\begin{theorem}
+If a closure $c$ in Curien's call-by-name semantics is equivalent to a
+configuration $c'$, and $c$ steps to $v$, then there exists a $v'$ that our
+call-by-name semantics steps to that is equivalent to $v$.
+\end{theorem}
+\begin{proofoutline}
+The proof proceeds by induction on Curien's step relation. The abstraction rule
+is a trivial base case. The variable lookup rule uses a helper lemma that proves
+by induction on the variable that if the two environments are equivalent and the
+\texttt{nth\_error} function looks up a closure, then the \texttt{clu} function
+will look up an equivalent closure. The application rule uses a helper lemma
+proves that a fresh allocation will keep any equivalent environments equivalent,
+and that the new environment defined by the fresh allocation will be equivalent
+to the extended environment of Curien's semantics.
+\end{proofoutline}
+
+\begin{figure}
+\begin{lstlisting}
+Inductive closure := | close : tm -> list closure -> closure. 
+Definition env := list closure.
+
+Inductive step : closure -> closure -> Type := 
+  | Abs : forall b e, step (close ($\lambda$b) e) (close ($\lambda$b) e)
+  | Var : forall x e v c, nth_error e x = Some c -> step c v -> step (close (var x) e) v
+  | App : forall m n b e v mve,
+      step (close m e) (close ($\lambda$b) mve) ->
+      step (close b (close n e::mve)) v ->
+      step (close (app m n) e) v.
+\end{lstlisting}
+\caption{Curien's Call-by-Name Calculus of Closures}
+\label{fig:curien}
+\end{figure}
+
+
+\begin{figure}
+\begin{lstlisting}
+Inductive step : conf -> conf -> Type :=
+  | Id : forall M x y z $\Phi$ $\Psi$ v e, clu y e $\Phi$ = Some (x, {M, z}) -> 
+                    $\langle$$\Phi$$\rangle$M $\Downarrow$ $\langle$$\Psi$$\rangle$v ->
+            $\langle$$\Phi$$\rangle$close (var y) e $\Downarrow$ $\langle$$\Psi$$\rangle$v
+  | Abs : forall N $\Phi$ e, $\langle$$\Phi$$\rangle$close ($\lambda$N) e $\Downarrow$ $\langle$$\Phi$$\rangle$close ($\lambda$N) e
+  | App : forall N M B B' $\Phi$ $\Psi$ $\Upsilon$ f e ne ae, isfresh (domain $\Psi$) f -> 
+                            f > 0 ->
+          $\langle$$\Phi$$\rangle$close M e $\Downarrow$ $\langle$$\Psi$$\rangle$close ($\lambda$B) ne -> 
+      $\langle$$\Psi$, f ↦ {close N e, ne}$\rangle$close B f $\Downarrow$ $\langle$$\Upsilon$$\rangle$close ($\lambda$B') ae   ->
+              $\langle$$\Phi$$\rangle$close (app M N) e $\Downarrow$ $\langle$$\Upsilon$$\rangle$close ($\lambda$B') ae
+where " c1 '$\Downarrow$' c2 " := (step c1 c2).
+\end{lstlisting}
+\caption{Call-by-Name Big Step Semantics}
+\label{fig:bigstepname}
+\end{figure}
+
+By proving that Curien's semantics is implemented by the call-by-name variant of
+our semantics, we provide further evidence that our call-by-need is a
+meaningful semantics. While eventually we'd like to prove that the call-by-need
+semantics implement an optimization of the call-by-name, we leave that for
+future work.
