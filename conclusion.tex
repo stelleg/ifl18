@@ -1,1 +1,14 @@
 \section{Conclusion} \label{sec:conclusion}
+
+We have presented the first verified compiler of a non-strict lambda calculus.
+In addition to proving that our call-by-need semantics is preserved through
+compilation, we have proved that Curien's calculus of closures is implemented by
+our call-by-name semantics. We argue that this provides compelling evidence that
+our compiler is a true verified compiler of call-by-need.
+
+We hope that this work can serve as a foundation for future work on real-world
+verified compilers. While it is clearly a toy compiler, we have some reason to
+believe that performance is reasonable and can be further improved \cite{cem}.
+In combination with efforts to formalize semantics of real-world languages like
+Haskell, we hope that this work can help us moved towards fully verified
+non-strict programs.

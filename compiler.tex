@@ -1,7 +1,32 @@
 \section{Compiler} \label{sec:compiler}
 
-In this section we describe the assembly language and the compiler. Our assembly
-language is a simple one, consisting of 
+In this section we describe the and the compiler, which compiles lambda terms to
+programs. The program recurses on lambda terms, keeping a current index into the
+program to ensure correct linking without a separate pass. For variables, when
+we get to zero we push the current environment pointer and a null instruction
+pointer to denote the update marker to the location of the closure being
+entered. Then we \texttt{mov} the closure into \texttt{IP} and \texttt{EP},
+recalling that the \texttt{jump} sets the \texttt{IP}. For the nonzero
+variables, we replicate traversing the environment pointer \texttt{i} times
+before loading the closure. For applications, we calculate the program location
+of the argument basic block, and push that and the current environment pointer
+onto the stack, effectively pushing an argument closure on top of the stack. We
+then jump to the left hand side of the application, as is standard for
+push-enter evaluation. For abstractions, we choose to use a conditional jump
+depending on whether the top of the stack is a null pointer (and therefore an
+update marker) or a valid instruction pointer (and therefore an argument). If it
+is an update marker, we update the heap location defined by the update marker
+with the current value instruction pointer and the current environment pointer.
+Note that we must point to the first value basic block, as this value could
+later update another heap location as well. In the case that the top of the
+stack was a valid instruction pointer, we allocate a new chunk of 3 word of
+memory, and mov the argument closure into it, with the current environment
+pointer as the environment continuation. We then set our current environment
+pointer to this fresh location. This is the process by which we extend our
+shared environment structure in the instruction machine. Finally, we perform an
+unconditional jump to the next basic block, which is the first basic block of
+the compiled body of the lambda. As this is an unconditional jump to the next
+basic block, for real machine code this jump can be omitted. 
 
 \begin{figure}
 \begin{lstlisting}
@@ -44,3 +69,19 @@ Fixpoint compile (t : tm) (k : nat) : Program := match t with
 \caption{Compiler Definition}
 \label{fig:compiler}
 \end{figure}
+
+Being able to define the full compiler this simply is what enabled this
+verification project. Other, more sophisticated implementations of call-by-need,
+such as the STG machine, are much harder to implement and reason about. It is
+worth noting that despite its simplicity, initial tests imply that performance
+is not as horrible as one might suspect, and is often competitive with state of
+the art \cite{cem}.
+
+As with the relation discussed in Section~\ref{sec:cem}, note that even when
+compiling, we do not require that a term is closed to compile it. Indeed, we
+will generate code that if entered is nonsense. Because we are only concerned
+with proving that we implement the source semantics in the case that it
+evaluates to a value, this is not a problem. If we wanted to strengthen our
+proof further, to show that if the source semantics gets stuck trying to
+dereference a free variable, the implementation would get stuck in the same way,
+with both failing to dereference a null pointer.    

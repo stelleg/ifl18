@@ -1,2 +1,121 @@
-\section{Discussion} \label{discussion}
+\section{Discussion} \label{sec:discussion}
 
+Here we discuss the paper, including threats to validity, future work, related
+work, and general discussion of the results.
+
+One thing we'd like to communicate is the difficulty we had in writing
+comprehensible proofs. The reader is discouraged from attempting to understand
+the proofs in any way by reading the Coq tactic source code. While we attempted
+to keep our definitions and lemmas as clean and comprehensible as possible, we
+found it extremely difficult to do the same with tactics. Partially this may be
+a failure on our part to become more familiar with the tactic language of Coq,
+but we suspect that the imperative nature of tactic proofs prevents
+composability of tactic meta-programs. 
+
+Another lesson was the importance of good induction principles. For example, in
+Section~\ref{sec:threats}, we will discuss the issue of only proving the
+implication of correctness in one direction. This is effectively a product of
+the power of the inductive properties of high level semantics, which makes them
+so much easier to reason about. Indeed, this lesson resonates with the purpose
+of the paper, which is that we'd like to reason about high level semantics,
+because they are so much easier to reason about due to their pleasant inductive
+properties, and have that reasoning preserved through compilation. 
+
+\subsection{Threats to Validity} \label{sec:threats}
+
+There are a few primary threats to validity that we address in this section. The
+first is the one mentioned in Section~\ref{sec:background}, that we only show
+that our compiler is correct in the case of termination of the source semantics.
+In other words, if the source semantics doesn't terminate, we can say nothing
+about how the compiled code behaves. This means that we could in theory get
+termination when the source semantics never does. 
+
+One argument in defense of our verification is that \emph{we generally only care
+about preservation of semantics for preserving reasoning about our programs}. In
+other words, if we have a program that we can't reason about, and therefore may
+not terminate, we care less about having a proof that semantics are preserved.
+Of course, this is a claim about most uses of program analysis. There are
+possible analyses that could say things along the lines of \emph{if} the source
+program terminates, then we can conclude $x$. We claim these cases are rare, and
+therefore the provided proof of correctness still provides the desired
+properties for most use cases. As mentioned before, this is also a common
+problem for verified compilation of functional languages. We have yet to see a
+verified compiler that proves the implication in both directions. 
+
+Another potential threat to validity is the use of a high level instruction
+machine language. While we claim that its high level and simplicity should make
+it possible to show that a real ISA implements this instruction machine, we
+haven't formally verified this step. We certainly agree that this would make for
+valuable future work, and hope that the reader agrees that nothing in the design
+of our high level instruction machine would prevent such work.
+
+As a dual to the issue of a high level instruction machine language, some
+readers may take issue with calling lambda calculus with deBruijn indices a
+"source language". Indeed, we do not advocate writing programs in such a
+language. Still, the conversion between lambda calculus with named variables and
+lambda calculus with deBruijn indices is a well understood topic, and we'd argue
+that it's not particularly interesting in the context of a verified compiler.
+Indeed, as noted below, semantics using named variables and substitution can be
+hard to get right \cite{launchbury_formal_breitner, japanese_cbn}, so we stand
+by our decision to relate to a semantics based on lambda calculus with deBruijn
+indices, namely Curien's calculus of closures. One potential approach for future
+work would be to prove that a call-by-name semantics using substition is
+equivalent to Curien's calculus of closures, which when combined with a proof
+that our call-by-need implements our call-by-name, would prove the compiler
+implements the semantics of a standard lambda calculus with named variables.
+
+A third thread to the validity of this work is the question of whether or not
+we've really proved that we've implemented \emph{call-by-need}. The question
+naturally arises of what exactly it means to prove an implementation of
+call-by-need is correct. There are certainly well-established semantics
+\cite{launchbury, ariola}, so one option would be to directly prove that the
+$\mathcal{CE}$ semantics implement one of those existing semantics.
+Unfortunately, recent work has shown that both of these have small issues that
+arise when formalized that require fixes. Indeed, we did stray down this path a
+good ways and discovered one of these issues which has been previously
+discovered in the literature \cite{japanese_cbn}. This raises the question of
+whether or not semantics that aren't obviously correct are a good base for what
+it means to be a call-by-need semantics. Instead, we've chosen to relate our
+call-by-name semantics formally to a semantics that is obviously correct,
+Curien's calculus of closures. Along with the tiny modification required for
+memoization of results, we hope that we've convinced the reader that it is
+\emph{extremely likely} that the memoization of results is correct. Of course,
+further evidence such as examples of correct evaluation would go further to
+convince the reader, and for that we encourage readers to
+play with a toy implementation at \url{https://github.com/stelleg/cem\_pearl}.
+Finally, a more convincing result would be a proof that the call-by-need
+semantics implement the call-by-name semantics, but with  
+
+Yet another threat to validity is our approach (or lack of approach) to
+heap-reuse. For simplicity, we have assumed that our fresh locations are fresh
+with respect to all existing bindings in the heap. Of course, this is
+unsatisfactory when compared to real implementations. It would be preferable to
+have our freshness constraint relaxed to only be fresh with respect to live
+bindings on the heap. We claim that this modification should be possible, at the
+cost of increased complexity in the proofs. 
+
+\subsection{Future Work}
+
+In addition to some of the future work discussed as ways of addressing issues in
+in Section~\ref{sec:threats}, there are some additional features that we think
+make for exciting areas of future work. 
+
+One such area is reasoning about preservation of operational properties such as
+time and space requirements. This would enable reasoning about time and space
+properties at the source level and ensuring that these are preserved through
+compilation. In addition, there has been growing interested in verified
+optimizations, where one can prove that some optimizations are both
+\emph{correct}, in that they provably preserve semantics, and \emph{true}
+optimizations, in that they only improve performance with respect to some
+performance model. By defining a baseline compiler and proving that it preserved
+operational properties like time and space usage, one would provide a good
+platform for which to apply this class of optimizations, resulting in a full
+compiler with verified bounds on time and space consumption. As with
+correctness, reasoning about operational properties is often likely to be easier
+in the context of the easy-to-reason about high level semantics, and having that
+reasoning provably preserved would be extremely valuable. 
+
+Another exciting area of future work is powerful proofs of type preservation
+through compilation.  While there has been existing work on type-preserving
+compilers, fully verified compilers like this one provide such a strong property
+that type-safety should fall out directly.

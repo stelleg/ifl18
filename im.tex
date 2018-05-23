@@ -1,27 +1,62 @@
 \section{Instruction Machine} \label{sec:im_semantics}
 
-Here we describe in full the instruction machine structure and semantics. We choose a simple
-stack machine with a Harvard architecture, with separate instruction and
-heap memory. We use natural numbers for pointers, though it shouldn't be too
-difficult to replace these with standard-sized machine words, e.g. 64 bits,
-along with making the stack and malloc operations partial. Our stack is
-represented as a list of pointers, though again it should be a relatively
-straightforward exercise to represent the stack in main memory. As with the
-machine word size, we'd need to make push operations partial to represent stacks
-this way. We define our machine to have only 4 registers: an instruction
-pointer, an environment pointer, and two scratch registers. Our instruction set
-is minimal, consisting only of a conditional \texttt{jump} instruction,
-\texttt{pop} and \texttt{push} instructions, a \texttt{mov} instruction, and a
-\texttt{new} instruction for allocating new memory. Note that for our program
-memory, we have pointers to basic blocks, but for simplicity of proofs we choose
-to not to point to increment the instruction pointer within a basic block.
-Instead, the instruction pointer is constant within a basic block, only
-changing between basic blocks. In fact, we actually represent the program as a
-list of basic blocks, with pointers indexing into the list. This has the
-advantage of being able to reason about sublists and their relation to terms. As
-with other design decisions, this also should be fairly unproblematic for
-formalization to a more realistic hardware design. The full syntax of the
-machine is given in Figure~\ref{fig:im_syntax}.  
+Here we describe in full the instruction machine syntax and semantics. We
+choose a simple stack machine with a Harvard architecture, with separate
+instruction and heap memory. We use natural numbers for pointers, though it
+shouldn't be too difficult to replace these with standard-sized machine words,
+e.g. 64 bits, along with making the stack and malloc operations partial. Our
+stack is represented as a list of pointers, though again it should be a
+relatively straightforward exercise to represent the stack in main memory. As
+with the machine word size, we'd need to make push operations partial to
+represent stacks this way. We define our machine to have only 4 registers: an
+instruction pointer, an environment pointer, and two scratch registers. Our
+instruction set is minimal, consisting only of a conditional \texttt{jump}
+instruction, \texttt{pop} and \texttt{push} instructions, a \texttt{mov}
+instruction, and a \texttt{new} instruction for allocating new memory. Note that
+for our program memory, we have pointers to basic blocks, but for simplicity of
+proofs we choose to not to point to increment the instruction pointer within a
+basic block.  Instead, the instruction pointer is constant within a basic
+block, only changing between basic blocks. In fact, we actually represent the
+program as a list of basic blocks, with pointers indexing into the list. This
+has the advantage of being able to reason about sublists and their relation to
+terms. As with other design decisions, this also should be fairly
+unproblematic for formalization to a more realistic hardware design. The full
+syntax of the machine is given in Figure~\ref{fig:im_syntax}.  
+
+\begin{figure}
+\begin{lstlisting}
+Inductive Reg := 
+  | IP
+  | EP
+  | R1
+  | R2.
+
+Inductive WO := 
+  | WR : Reg -> WO
+  | WM : Reg -> nat -> WO.
+
+Infix "%" := WM (at level 30).
+
+Inductive RO := 
+  | RW : WO -> RO
+  | RC : nat -> RO.
+
+Inductive Instr : Type :=
+  | push : RO -> Instr
+  | pop : WO -> Instr
+  | new : nat -> WO -> Instr 
+  | mov : RO -> WO -> Instr.
+
+Inductive BasicBlock : Type :=
+  | instr : Instr -> BasicBlock -> BasicBlock
+  | jump : option (RO*Ptr) -> RO -> BasicBlock.
+
+Definition Program := list BasicBlock.
+\end{lstlisting}
+\caption{Instruction Machine Syntax}
+\label{fig:im_syntax}
+\end{figure}
+
 
 The machine semantics should be unsurprising. The \texttt{push} instruction
 takes a read operand and pushes it onto the stack. The \texttt{pop} instruction

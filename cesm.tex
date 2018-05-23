@@ -4,17 +4,42 @@ In this section we discuss the small step semantics, and show that they
 implement the big step semantics of Section~\ref{cem}. This is a fairly
 straightforward transformation implemented by adding a stack. The source
 langauge is the same, and we simply add a stack to our configuration. The stack
-elements are either argument closures or update markers. Update markers are
-pushed onto the stack when a variable dereferences a location in the heap.
-Argument closures are pushed onto the stack by applications, with the same
-environment pointer duplicated in the current closure and the argument closure. 
-The semantics are defined in Figure~\ref{fig:cesm}.  
+elements are either argument closures (\texttt{inr}) or update markers
+(\texttt{inl}). Update markers locations that are pushed onto the stack when a
+variable dereferences that location in the heap. When they are popped by an
+abstraction, that location is replaced by said abstraction, so that later
+dereferences by the same variable in the same scope dereference the value, and
+don't repeat the computation. Argument closures are pushed onto the stack by
+applications, with the same environment pointer duplicated in the current
+closure and the argument closure. Argument closures are popped off the stack by
+abstractions, which allocate a fresh memory location, write the argument closure
+to it, write the environment continuation as the current environment pointer,
+then enter the body of the abstraction with the fresh environment pointer. This
+is the mechanism used for extending the shared environment structure. The
+semantics are defined formally in Figure~\ref{fig:cesm}. The \texttt{update}
+function replaces a closure in a heap cell with the specified closure.  
 
 \begin{figure}
 \begin{lstlisting}
-
+Inductive step : transition state :=
+  | Upd : forall $\Phi$ b e l s, 
+  st $\Phi$ (inr l::s) (close (lam b) e) ->_s 
+  st (update $\Phi$ l (close (lam b) e)) s (close (lam b) e)
+  | Var : forall $\Phi$ s v l c e e', clu v e $\Phi$ = Some (l,cl c e') -> 
+  st $\Phi$ s (close (var v) e) ->_s 
+  st $\Phi$ (inr l::s) c
+  | Abs : forall $\Phi$ b e f c s, isfresh (domain $\Phi$) f -> f > 0 -> 
+  st $\Phi$ (inl c::s) (close (lam b) e) ->_s 
+  st ((f, cl c e):: $\Phi$) s (close b f)
+  | App : forall $\Phi$ e s n m, 
+  st $\Phi$ s (close (app m n) e) ->_s 
+  st $\Phi$ (inl (close n e)::s) (close m e)
+where " c1 '->_s' c2 " := (step c1 c2).
 \end{lstlisting}
+\caption{Small Step Semantics}
+\label{fig:cesm}
 \end{figure}
+
 Note that the presentation given here differs slightly from previous
 presentations \cite{cem}, which inlined the lookup into the machine steps. This
 is to simplify formalization and relation to the big step semantics, but doesn't
@@ -52,4 +77,6 @@ extend the environment with the argument closure, and evaluate the result to a
 value by the second induction hypothesis.   
 \end{proofoutline}
 
-
+Adding a stack in this fashion is a standard approach to converting between big
+step and small step semantics. Still, we appreciate that this approach applies
+here in a straightforward way. 

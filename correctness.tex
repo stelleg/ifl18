@@ -1,4 +1,4 @@
-\section{Compiler Correctness} \sec{sec:correctness}
+\section{Compiler Correctness} \label{sec:correctness}
 
 In this section we define a relation between the state of the small step
 semantics and the state of the instruction machine semantics, and show that the
@@ -61,7 +61,7 @@ equivalent to the closure represented by the instruction pointer, environment
 pointer pair, and that the stacks and the heaps are equivalent.  
 
 Now that we have our relation between heaps, we can state our primary lemma.
-\begin{lemma}
+\begin{lemma} \label{lem:cesm_im}
 Given that an instruction machine state $i$ is related to a small step
 semantics state $s$, and that small step semantics state steps to a new state
 $s'$, the instruction machine will step in zero or more steps to a related state
@@ -104,3 +104,30 @@ relations are preserved by the update.
 
 To paraphrase Pascal: given more time, I would have written a shorter proof.
 
+We now have a proof that the small step semantics implements the big step
+semantics, and a proof that the instruction machine implements the small step
+semantics. We can now combine these to get our main correct compiler theorem. 
+
+\begin{theorem}
+If a term $t$ placed into the initial configuration for the big step semantics
+evaluates to a value configuration $v$, then the instruction machine starting
+in the initial state with $compile 0 t$ as its program will evaluate to a
+related state $v'$.  
+\end{theorem}
+\begin{proofoutline}
+We first require that the relation defined between the small step semantics
+state and the instruction machine state holds for the initial configurations.
+This follows fairly directly from the definition of the initial conditions and
+the compile function. Second, we have by definition of reflexive transitive
+closure, that the previous lemma implies that if the reflexive transitive
+closure of the small step relation evaulates takes zero or more steps from a
+state $c$ to a state $v$, then a related state of the instruction machine $c'$
+will evaluate to a state $v'$ which is related to $v$. We use these two facts,
+along with the proof that the small step implements the big step for any stack,
+specialized on the empty stack, to prove our theorem. 
+\end{proofoutline}
+
+Its worth recalling exactly what the relation implies about the two value
+states. Namely, in addition to the value closures being equivalent, their heaps
+and environments are equivalent, so that every reachable closure in the
+environment is equivalent between the two.

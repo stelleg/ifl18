@@ -8,8 +8,7 @@ that our implementation preserves the big-step semantics, we prove preservation
 of any inductive reasoning on the structure of evaluation tree.  
 
 As discussed in Section~\ref{intro}, our source semantics is lambda calculus
-with deBruijn indices. 
-\begin{align*}
+with deBruijn indices.  \begin{align*}
  t &::= t \; t \; | \; x \; | \;  \lambda \; t \\
  x &\in \mathbb{N}
 \end{align*}
@@ -20,31 +19,34 @@ preventing needing to reason about lambda lifting and indirections due to
 closure size changes. We operate on closures, which combine terms with
 pointers into the shared environment, which is implemented as a heap. Every
 heap location points to a cell, which contains a closure and a pointer to the
-next environment location if necessary. Variable dereferences index into this
-shared environment structure, while the binding of a new variable extends the
-shared environment structure with a new cell. Applications evaluate the left
-hand side to an abstraction, then extend the environment with the argument term
-closed under the environment pointer at the environment of the application. The
-application rule enforces the fact that two variables bound to the same argument
-closure will point to the same location in the shared environment. Because the
-point to the same location by construction of the shared environment, we can use
-this property to update that location with the value computed at the first
-variable dereference, and then each subsequent dereference will point to this
-value. The variable rule applies the update by indexing into the shared
-environment structure and replacing the closure at that location with the
-resulting value. The big step semantics are described in the standard way by
-logical relation in Figure~\ref{fig:bigstep}. The \texttt{update $\Psi$ x v}
-function replaces the closure at location \texttt{x} in heap $\Psi$ with value
-\texttt{v}. The curly brackets construct a heap cell containing a closure and a
-environment continuation. The \texttt{app} constructor represents an application,
-while the \texttt{var} constructor is a variable constructor and $\lambda$ is
-the constructor for an abstraction. The \texttt{clu} function looks up a
-variable index in the shared environment structure by following environment
+next environment location if necessary, which we will refer to as the
+environment continuation. Variable dereferences index into this shared
+environment structure, and if/when a dereferenced location evaluates to a value,
+the original closure (potentially a thunk or closure not evaluated to WHNF) will
+be replaced with said value. The binding of a new variable extends the shared
+environment structure with a new cell. This is done by application, which
+evaluate the left hand side to an abstraction, then extend the environment with
+the argument term closed under the environment pointer at the environment of the
+application. The application rule enforces the fact that two variables bound to
+the same argument closure will point to the same location in the shared
+environment. Because the point to the same location by construction of the
+shared environment, we can use this property to update that location with the
+value computed at the first variable dereference, and then each subsequent
+dereference will point to this value. The variable rule applies the update by
+indexing into the shared environment structure and replacing the closure at that
+location with the resulting value. The big step semantics are described in the
+standard way by logical relation in Figure~\ref{fig:bigstep}. The \texttt{update
+$\Psi$ x v} function replaces the closure at location \texttt{x} in heap $\Psi$
+with value \texttt{v}. The curly brackets construct a heap cell containing a
+closure and a environment continuation. The \texttt{app} constructor represents
+an application, while the \texttt{var} constructor is a variable constructor and
+$\lambda$ is the constructor for an abstraction. The \texttt{clu} function looks
+up a variable index in the shared environment structure by following environment
 continuation pointers.  The $\langle \Phi \rangle \texttt{c}$ notation
 constructs a configuration from a heap $\Phi$ and a closure \texttt{c}. Note
-that we require that fresh variables are greater than zero. This is required
-for reasoning about compilation to the instruction machine, which we will
-return to in Section~\ref{sec:im}.
+that we require that fresh variables are greater than zero. This is required for
+reasoning about compilation to the instruction machine, which we will return to
+in Section~\ref{sec:im}.
 
 \begin{figure}
 \begin{lstlisting}
@@ -105,6 +107,11 @@ do computation on in standard ways. For example, we could potentially compute
 properties like size and depth, which would be related to operational properties
 of compiled code. We hope in future work to explore this approach further.
 
+Finally, given a term $t$, we define the initial configuratoin as $\langle [] \rangle
+\texttt{close t 0}$. As discussed, the choice of the null pointer for the envioronment
+pointer is not arbitrary, but chosen across our semantics uniformly to represent
+failed environment lookup. 
+
 \subsection{Call-By-Name}
 
 In this section we define a call-by-name variant of our big step semantics and
@@ -138,7 +145,7 @@ Curien's call by name semantics:
 \begin{theorem}
 If a closure $c$ in Curien's call-by-name semantics is equivalent to a
 configuration $c'$, and $c$ steps to $v$, then there exists a $v'$ that our
-call-by-name semantics steps to that is equivalent to $v$.
+call-by-name semantics steps to from $c'$ that is equivalent to $v$.
 \end{theorem}
 \begin{proofoutline}
 The proof proceeds by induction on Curien's step relation. The abstraction rule
@@ -164,7 +171,7 @@ Inductive step : closure -> closure -> Type :=
       step (close b (close n e::mve)) v ->
       step (close (app m n) e) v.
 \end{lstlisting}
-\caption{Curien's Call-by-Name Calculus of Closures}
+\caption{Curien's Calculus of Closures}
 \label{fig:curien}
 \end{figure}
 
@@ -192,3 +199,8 @@ our semantics, we provide further evidence that our call-by-need is a
 meaningful semantics. While eventually we'd like to prove that the call-by-need
 semantics implement an optimization of the call-by-name, we leave that for
 future work.
+
+One imporant note is that nowhere do we require that a term being evaluated is
+complete closed by its environment. Indeed, we don't and it's possible that a
+term with free variables can be evaluated by both semantics. This theme will
+recur through the rest of the paper, so it's worth keeping in mind.  
