@@ -33,6 +33,15 @@ of Functional Languages}{September 2018}{Lowell, MA, USA}
  {\renewcommand\qedsymbol{}\proof[Proof outline]}
  {\endproof}
 
+\begin{abstract}
+Call-by-need semantics are widely used in the programming language Haskell.
+Unfortunately, unlike their call-by-value counterparts, there are no verified
+compilers for call-by-need. In this paper we present the first verified compiler
+for call-by-need semantics. We build on recent work on simple call-by-need
+abstract machines as a way of reducing formalization burden. We discuss some of
+the difficulties in verifying call-by-need, and show how we overcome them. 
+\end{abstract}
+
 \begin{document}
 
 %\titlebanner{Preprint}        % These are ignored unless
@@ -67,10 +76,6 @@ of Functional Languages}{September 2018}{Lowell, MA, USA}
 \email{darko@unm.edu}          %% \email is recommended
 
 \maketitle
-
-\begin{abstract}
-\input{abstract}
-\end{abstract}
 
 \input{intro}
 \input{background}
