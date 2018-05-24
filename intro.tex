@@ -1,68 +1,91 @@
 \section{Introduction} \label{sec:introduction}
-Call-by-need semantics are heavily relied on in languages like Haskell to ensure
-efficient execution of non-strict semantics. These semantics let programmers
-focus more on the correctness and composability of their code, without worrying
-so much about operational properties. 
+Non-strict languages like Haskell rely heavily on call-by-need semantics to
+ensure efficient execution. Without the memoization of results provided by
+call-by-need, Haskell would be prohibitively inefficient, often exponentially
+slower than it's call-by-value counterparts. There is also an argument to be
+made for Haskell being one of the most pure languages in wide use for software
+development, making reasoning about correctness in Haskell easier than most
+languages. It is for this reason that we'd like to have a compiler that gives
+formal guarantees about preservation of call-by-need semantics. We'd like to
+ensure that any reasoning we do about our non-strict functional programs is
+preserved through compilation, and that it won't be prohibitively inefficient.
+
+Unfortunately, one of the challenges for formalization of non-strict compilers
+is that the semantics of call-by-need abstract machines tend to be complex,
+incorporating complex optimizations into the semantics, requiring preprocessing
+of terms, and closures of variable sizes \cite{stg, TIM}. Fortunately, there has
+been recent development of a particularly simple abstract machine for
+call-by-need: the $\mathcal{CE}$ machine \cite{cem}. In addition to being
+exceedingly simple to implement, the machine shows performance often comparable
+to state-of-the-art \cite{cem}.
 
 Verified compilers provide powerful guarantees about the code they generate, and
-its relation to the corresponding source code. In particular, for higher order
-functional languages, they can often ensure that the non-trivial task of
-compiling lambda calculus and its derivatives to machine code is implemented
-correctly, preserving some source semantics. There is a sense in which the
-amortized return on investment for verified compilers is high: any reasoning
-about any program which is compiled with a verified compiler is provably
-preserved. 
+its relation to the corresponding source code \cite{chlipala, compcert, cakeml}.
+In particular, for higher order functional languages, they can often ensure that
+the non-trivial task of compiling lambda calculus and its derivatives to machine
+code is implemented correctly, preserving source semantics. There is a sense in
+which the amortized return on investment for verified compilers is high: any
+reasoning about any program which is compiled with a verified compiler is
+provably preserved. 
 
-Existing verified compilers have all focused on call-by-value semantics. This
-semantics has the property of being historically easier to implement than
-call-by-need, and therefore likely easier to reason about formally. In this
-paper, we build on recent work developing a simple method for implementing
-call-by-need semantics, enabling us to implement, and reason formally about the
-correctness of, call-by-need. We use the Coq proof assistant \cite{coq} to
-implement and prove the correctness of our compiler. We start with a source
-language of $\lambda$ calculus with deBruijn indices:
+Existing verified compilers have all focused on call-by-value semantics
+\cite{chlipala, compcert, cakeml}. This semantics has the property of being
+historically easier to implement than call-by-need, and therefore likely easier
+to reason about formally. In this paper, we build on recent work developing a
+simple method for implementing call-by-need semantics, enabling us to implement,
+and reason formally about the correctness of, call-by-need. We use the Coq proof
+assistant \cite{coq} to implement and prove the correctness of our compiler. We
+start with a source language of $\lambda$ calculus with deBruijn indices:
 \begin{align*}
  t &::= t \; t \; | \; x \; | \;  \lambda \; t \\
  x &\in \mathbb{N}
 \end{align*}
-Our source semantics is the big-step operational semantics of a recently
-developed $\mathcal{CE}$ machine, which uses shared environments to share
-results between instances of a bound variable. To strengthen the result, we also
-show that the $\mathcal{CE}$ machine implements Curien's call-by-name calculus
-of closures. Combining these results shows that the compiler correctly
-implements both call-by-name and call-by-need.
+Our source semantics is the big-step operational semantics the $\mathcal{CE}$
+machine, which uses shared environments to share results between instances of a
+bound variable. To strengthen the result, and relate it to a better known
+semantics, we also show that the call-by-name $\mathcal{CE}$ machine implements
+Curien's call-by-name calculus of closures. 
 
-It may surprise the reader to see that we don't start with a well-known
-call-by-need semantics; we address this concern in in Section~\ref{sec:discussion}.
-To convince ourselves and the reader that we are correctly implementing
-call-by-need, we state and prove the crucial property of call-by-need explicitly
-as a Lemma: any bound closure will be evaluated at most once. This, combined
-with the proof that we our call-by-name version of the semantics implements
+It may surprise the reader to see that we don't start with a more well-known
+call-by-need semantics; we address this concern in in
+Section~\ref{sec:discussion}.  With the proof of compiler correctness, along
+with the proof that our call-by-name version of the semantics implements
 Curien's call-by-name semantics, should hopefully convince the reader that we
-have indeed implemented a call-by-need semantics, despite not using an
+have indeed implemented a call-by-need semantics, despite not using a more
 well-known definition of call-by-need. 
 
-This simple target allows us to describe the compiler and proofs in a concise
-way for the paper, while still allowing flexibility in eventually verifying a
-compiler down to machine code for some real hardware, e.g. x64.
+For our target, we define a simple instruction machine, described in
+Section~\ref{sec:im_semantics}. This simple target allows us to describe the
+compiler and proofs in a concise way for the paper, while still allowing
+flexibility in eventually verifying a compiler down to machine code for some
+set of real hardware, e.g. x86, ARM, Power. 
+
+Our main results is a proof that whenever the source semantics evaluates to a
+value, the compiled code evaluates to the same value. While there are stronger
+definitions of what qualifies as a verified compiler, we argue that this is
+sufficient in Section~\ref{sec:discussion}. This main result, along with the
+proof that the call-by-name version of our semantics implements Curien's
+calculus of closures, are the primary contributions of this paper. We are
+unaware of any existing verified non-strict compilers, much less a verified
+compiler of call-by-need. 
 
 The paper is structured as follows. In Section~\ref{sec:background} we give the
 necessary background for the paper. In Section~\ref{sec:cem_big} we describe the
 source syntax and semantics (the big-step $\mathcal{CE}$ semantics) in detail.
 We also use this section to define a call-by-name version of the semantics, and
 show that it implements Curien's calculus of closures \cite{curien}.  In
-Section~\ref{sec:cem_small} we describe the small step $\mathcal{CE}$ semantics and
-their relation to the big-step semantics. In
-Section~\ref{sec:im_semantics} we describe the instruction machine syntax and
-semantics. In Section~\ref{sec:compiler} we describe the compilation from
-machine terms to assembly language. In Section~\ref{sec:correctness} we describe
-how evaluation of compiled programs is related to the small step $\mathcal{CE}$
-semantics. the compilation of terms into assembly language, and the instruction
-machine semantics, and finally compose this proof with the proof that the
-small step semantics implement the big step semantics to show that the
-instruction machine implements the big step semantics. In
-Section~\ref{sec:discussion} we discuss threats to validity, future work, and
-related work. Finally, we conclude in Section~\ref{sec:conclusion}.
+Section~\ref{sec:cem_small} we describe the small step $\mathcal{CE}$ semantics
+and their relation to the big-step semantics. In Section~\ref{sec:im_semantics}
+we describe the instruction machine syntax and semantics. In
+Section~\ref{sec:compiler} we describe the compilation from machine terms to
+assembly language. In Section~\ref{sec:correctness} we describe how evaluation
+of compiled programs is related to the small step $\mathcal{CE}$ semantics. the
+compilation of terms into assembly language, and the instruction machine
+semantics, and finally compose this proof with the proof that the small step
+semantics implement the big step semantics to show that the instruction machine
+implements the big step semantics. In Section~\ref{sec:discussion} we discuss
+threats to validity, future work, and related work. Finally, we conclude in
+Section~\ref{sec:conclusion}.
 
-The Coq source code with all the definitions and proofs is available at
-\url{https://github.com/stelleg/cem\_coq}. 
+The Coq source code with all the definitions and proofs described in this
+document is available at \url{https://github.com/stelleg/cem\_coq}. 

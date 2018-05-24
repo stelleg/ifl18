@@ -30,6 +30,8 @@ basic block, for real machine code this jump can be omitted.
 
 \begin{figure}
 \begin{lstlisting}
+Infix ";" := instr (at level 30, right associativity).
+
 Fixpoint var_inst (i : nat) : BasicBlock := match i with
   | 0 => push EP ;
          push (RC 0) ;
@@ -70,7 +72,7 @@ Fixpoint compile (t : tm) (k : nat) : Program := match t with
 \label{fig:compiler}
 \end{figure}
 
-Being able to define the full compiler this simply is what enabled this
+Being able to define the full compiler this simply is crucial to this
 verification project. Other, more sophisticated implementations of call-by-need,
 such as the STG machine, are much harder to implement and reason about. It is
 worth noting that despite its simplicity, initial tests imply that performance

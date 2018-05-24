@@ -115,6 +115,13 @@ correctness, reasoning about operational properties is often likely to be easier
 in the context of the easy-to-reason about high level semantics, and having that
 reasoning provably preserved would be extremely valuable. 
 
+Those familiar with Coq may have noticed that in general we operate in the
+\texttt{Type} universe instead of the \texttt{Prop}. This is largely due to the
+desire to eventually do computation on the proof structures defined here,
+towards the goal of proving operational properties. For example, by operating on 
+the big step relation data structure, one could compute time and space
+requirements for a program evaluation.
+
 Another exciting area of future work is powerful proofs of type preservation
 through compilation.  While there has been existing work on type-preserving
 compilers, fully verified compilers like this one provide such a strong property

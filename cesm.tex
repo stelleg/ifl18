@@ -1,37 +1,41 @@
 \section{Small Step Source Semantics} \label{sec:cem_small}
 
-In this section we discuss the small step semantics, and show that they
-implement the big step semantics of Section~\ref{cem}. This is a fairly
-straightforward transformation implemented by adding a stack. The source
-langauge is the same, and we simply add a stack to our configuration. The stack
-elements are either argument closures (\texttt{inr}) or update markers
-(\texttt{inl}). Update markers locations that are pushed onto the stack when a
-variable dereferences that location in the heap. When they are popped by an
-abstraction, that location is replaced by said abstraction, so that later
-dereferences by the same variable in the same scope dereference the value, and
-don't repeat the computation. Argument closures are pushed onto the stack by
-applications, with the same environment pointer duplicated in the current
-closure and the argument closure. Argument closures are popped off the stack by
-abstractions, which allocate a fresh memory location, write the argument closure
-to it, write the environment continuation as the current environment pointer,
-then enter the body of the abstraction with the fresh environment pointer. This
-is the mechanism used for extending the shared environment structure. The
-semantics are defined formally in Figure~\ref{fig:cesm}. The \texttt{update}
-function replaces a closure in a heap cell with the specified closure.  
+In this section we discuss the small step semantics of the $\mathcal{CE}$
+machine, and show that they implement the big step semantics of
+Section~\ref{cem}. This is a fairly straightforward transformation implemented
+by adding a stack. The source langauge is the same, and we simply add a stack to
+our configuration (and call it a state). The stack elements are either argument
+closures (\texttt{inr}) or update markers (\texttt{inl}). Update markers
+locations that are pushed onto the stack when a variable dereferences that
+location in the heap. When they are popped by an abstraction, that location is
+replaced by said abstraction, so that later dereferences by the same variable in
+the same scope dereference the value, and don't repeat the computation. Argument
+closures are pushed onto the stack by applications, with the same environment
+pointer duplicated in the current closure and the argument closure. Argument
+closures are popped off the stack by abstractions, which allocate a fresh memory
+location, write the argument closure to it, write the environment continuation
+as the current environment pointer, then enter the body of the abstraction with
+the fresh environment pointer. This is the mechanism used for extending the
+shared environment structure. The semantics are defined formally in
+Figure~\ref{fig:cesm}. The \texttt{update} function replaces a closure in a heap
+cell with the specified closure.  
 
 \begin{figure}
 \begin{lstlisting}
 Inductive step : transition state :=
-  | Upd : forall $\Phi$ b e l s, 
+  | Upd : $\forall$ $\Phi$ b e l s, 
   st $\Phi$ (inr l::s) (close (lam b) e) ->_s 
   st (update $\Phi$ l (close (lam b) e)) s (close (lam b) e)
-  | Var : forall $\Phi$ s v l c e e', clu v e $\Phi$ = Some (l,cl c e') -> 
+  | Var : $\forall$ $\Phi$ s v l c e e', 
+  clu v e $\Phi$ = Some (l,cl c e') -> 
   st $\Phi$ s (close (var v) e) ->_s 
   st $\Phi$ (inr l::s) c
-  | Abs : forall $\Phi$ b e f c s, isfresh (domain $\Phi$) f -> f > 0 -> 
+  | Abs : $\forall$ $\Phi$ b e f c s, 
+  isfresh (domain $\Phi$) f -> 
+  f > 0 -> 
   st $\Phi$ (inl c::s) (close (lam b) e) ->_s 
   st ((f, cl c e):: $\Phi$) s (close b f)
-  | App : forall $\Phi$ e s n m, 
+  | App : $\forall$ $\Phi$ e s n m, 
   st $\Phi$ s (close (app m n) e) ->_s 
   st $\Phi$ (inl (close n e)::s) (close m e)
 where " c1 '->_s' c2 " := (step c1 c2).

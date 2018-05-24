@@ -62,11 +62,14 @@ allow reasoning about garbage collection or direct heap-reuse.
 \begin{figure}
 \begin{lstlisting}
 Inductive step : conf -> conf -> Type :=
-  | Id : forall M x y z $\Phi$ $\Psi$ v e, clu y e $\Phi$ = Some (x, {M, z}) -> 
+  | Id : $\forall$ M x y z $\Phi$ $\Psi$ v e, 
+              clu y e $\Phi$ = Some (x, {M, z}) -> 
                     $\langle$$\Phi$$\rangle$M $\Downarrow$ $\langle$$\Psi$$\rangle$v ->
       $\langle$$\Phi$$\rangle$close (var y) e $\Downarrow$ $\langle$update $\Psi$ x v$\rangle$v
-  | Abs : forall N $\Phi$ e, $\langle$$\Phi$$\rangle$close ($\lambda$N) e $\Downarrow$ $\langle$$\Phi$$\rangle$close ($\lambda$N) e
-  | App : forall N M B B' $\Phi$ $\Psi$ $\Upsilon$ f e ne ae, isfresh (domain $\Psi$) f -> 
+  | Abs : $\forall$ N $\Phi$ e, 
+          $\langle$$\Phi$$\rangle$close ($\lambda$N) e $\Downarrow$ $\langle$$\Phi$$\rangle$close ($\lambda$N) e
+  | App : $\forall$ N M B B' $\Phi$ $\Psi$ $\Upsilon$ f e ne ae, 
+                      isfresh (domain $\Psi$) f -> 
                             f > 0 ->
           $\langle$$\Phi$$\rangle$close M e $\Downarrow$ $\langle$$\Psi$$\rangle$close ($\lambda$B) ne -> 
       $\langle$$\Psi$, f ↦ {close N e, ne}$\rangle$close B f $\Downarrow$ $\langle$$\Upsilon$$\rangle$close ($\lambda$B') ae   ->
@@ -169,9 +172,9 @@ Inductive closure := | close : tm -> list closure -> closure.
 Definition env := list closure.
 
 Inductive step : closure -> closure -> Type := 
-  | Abs : forall b e, step (close ($\lambda$b) e) (close ($\lambda$b) e)
-  | Var : forall x e v c, nth_error e x = Some c -> step c v -> step (close (var x) e) v
-  | App : forall m n b e v mve,
+  | Abs : $\forall$ b e, step (close ($\lambda$b) e) (close ($\lambda$b) e)
+  | Var : $\forall$ x e v c, nth_error e x = Some c -> step c v -> step (close (var x) e) v
+  | App : $\forall$ m n b e v mve,
       step (close m e) (close ($\lambda$b) mve) ->
       step (close b (close n e::mve)) v ->
       step (close (app m n) e) v.
@@ -184,18 +187,21 @@ Inductive step : closure -> closure -> Type :=
 \begin{figure}
 \begin{lstlisting}
 Inductive step : conf -> conf -> Type :=
-  | Id : forall M x y z $\Phi$ $\Psi$ v e, clu y e $\Phi$ = Some (x, {M, z}) -> 
+  | Id : $\forall$ M x y z $\Phi$ $\Psi$ v e, 
+          clu y e $\Phi$ = Some (x, {M, z}) -> 
                     $\langle$$\Phi$$\rangle$M $\Downarrow$ $\langle$$\Psi$$\rangle$v ->
             $\langle$$\Phi$$\rangle$close (var y) e $\Downarrow$ $\langle$$\Psi$$\rangle$v
-  | Abs : forall N $\Phi$ e, $\langle$$\Phi$$\rangle$close ($\lambda$N) e $\Downarrow$ $\langle$$\Phi$$\rangle$close ($\lambda$N) e
-  | App : forall N M B B' $\Phi$ $\Psi$ $\Upsilon$ f e ne ae, isfresh (domain $\Psi$) f -> 
+  | Abs : $\forall$ N $\Phi$ e, 
+        $\langle$$\Phi$$\rangle$close ($\lambda$N) e $\Downarrow$ $\langle$$\Phi$$\rangle$close ($\lambda$N) e
+  | App : $\forall$ N M B B' $\Phi$ $\Psi$ $\Upsilon$ f e ne ae, 
+              isfresh (domain $\Psi$) f -> 
                             f > 0 ->
           $\langle$$\Phi$$\rangle$close M e $\Downarrow$ $\langle$$\Psi$$\rangle$close ($\lambda$B) ne -> 
       $\langle$$\Psi$, f ↦ {close N e, ne}$\rangle$close B f $\Downarrow$ $\langle$$\Upsilon$$\rangle$close ($\lambda$B') ae   ->
               $\langle$$\Phi$$\rangle$close (app M N) e $\Downarrow$ $\langle$$\Upsilon$$\rangle$close ($\lambda$B') ae
 where " c1 '$\Downarrow$' c2 " := (step c1 c2).
 \end{lstlisting}
-\caption{Call-by-Name Big Step Semantics}
+\caption{Call-by-Name $\mathcal{CE}$ Semantics}
 \label{fig:bigstepname}
 \end{figure}
 

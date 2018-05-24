@@ -88,12 +88,13 @@ the existence of such functionality \cite{chlipala}. For simplicity, we assume
 that the allocation function returns completely fresh memory, though it should
 be possible to modify this assumption to be less restrictive, i.e. let it re-use
 heap locations that are no-longer live. The complete semantics of the machine
-are given in Figure~\ref{fig:im_semantics}. Note that we separate instruction steps
-and basic block steps. A basic block is a sequence of instructions that ends
-with a jump, which will set the IP to the next basic block to be evaluated. The
-full out step function will lookup the basic block at that IP, and if the
-basicblock will evaluate to a new state, then the machine will also evaluate to
-that state. 
+are given in Figure~\ref{fig:im_semantics}. Note that we separate instruction
+steps and basic block steps. Recall that a basic block is a sequence of
+instructions that ends with a jump. The \texttt{step\_bb} relation will execute
+the instructions in the basic block in order, then set the IP in accordance with
+the \texttt{jump} semantics. The \texttt{step} relation looks the basic block at
+the current IP, and if executing the basicblock results in a new state, then the
+machine executes to that state. 
 
 \begin{figure}
 \begin{lstlisting}
