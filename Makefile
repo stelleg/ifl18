@@ -1,4 +1,4 @@
-all: view
+all: paper.pdf 
 
 paper.pdf: *.tex *.bib 
 	xelatex paper.tex

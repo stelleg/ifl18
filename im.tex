@@ -16,12 +16,12 @@ instruction, and a \texttt{new} instruction for allocating new memory. Note that
 for our program memory, we have pointers to basic blocks, but for simplicity of
 proofs we choose to not to point to increment the instruction pointer within a
 basic block.  Instead, the instruction pointer is constant within a basic
-block, only changing between basic blocks. In fact, we actually represent the
-program as a list of basic blocks, with pointers indexing into the list. This
-has the advantage of being able to reason about sublists and their relation to
-terms. As with other design decisions, this also should be fairly
-unproblematic for formalization to a more realistic hardware design. The full
-syntax of the machine is given in Figure~\ref{fig:im_syntax}.  
+block, only changing between basic blocks. In fact, we represent the program as
+a list of basic blocks, with pointers indexing into the list. This has the
+advantage of being able to easily reason about sublists and their relation to
+terms. As with other design decisions, this also should be fairly unproblematic
+for formalization to a more realistic hardware design. The full syntax of the
+machine is given in Figure~\ref{fig:im_syntax}.  
 
 \begin{figure}
 \begin{lstlisting}
@@ -57,32 +57,43 @@ Definition Program := list BasicBlock.
 \label{fig:im_syntax}
 \end{figure}
 
+Note we separate read (\texttt{RO}) and write (\texttt{WO}) operands. Write
+operands can be registers (\texttt{WR}) or memory (\texttt{WM}). Read registers
+can be any write operand (\texttt{RW}) or a constant (\texttt{RC}). For reading,
+we have a \texttt{read} relation, which takes a read operand and a state and is
+inhabited when the third argument can be read from that read operand in that
+state. Similarly, a \texttt{write} relation which is inhabited when writing the
+second argument into the first in a state defined by the third argument results
+in the state defined by the fourth argument.  
 
-The machine semantics should be unsurprising. The \texttt{push} instruction
-takes a read operand and pushes it onto the stack. The \texttt{pop} instruction
-pops the top of the stack into a write operand. The \texttt{mov} instruction
-moves a machine word from a read operand to a write operand. The \texttt{jump}
-instruction is parameterized by an optional pair, which if present, reads 
-the first element of the pair from a read operand, checks if it is zero, and if
-so sets the ip to the second element of the pair, which is a constant pointer. If the
-condition is not zero, then it sets the ip to the instruction pointer contained
-in the second jump argument. If we pass nothing as the first argument, then it
-becomes an unconditional set of the ip to the value read from the second argument.
-Note that the second argument is a read operand, so can either be a constant or
-read from a register or memory. This means it can be effectively either a direct
-or indirect jump, both of which are used in the compilation of lambda terms. The
-\texttt{new} instruction allocates a contiguous block of new memory and writes
-the result into a write operand. We take the approach of not choosing a
-particular allocation strategy. Instead, we parameterize our proof on the
-existence of such functionality. For simplicity, we assume that the allocation
-function returns completely fresh memory, though it should be possible to modify
-this assumption to be less restrictive, i.e. let it re-use heap locations that
-are no-longer live. The complete semantics of the machine are given in
-Figure~\ref{im_semantics}. Note that we separate instruction steps and basic
-block steps. A basic block is a sequence of instructions that ends with a jump,
-which will set the IP to the next basic block to be evaluated. The full out step
-function will lookup the basic block at that IP, and if the basicblock will
-evaluate to a new state, then the machine will also evaluate to that state. 
+The machine semantics should be fairly unsurprising. A \texttt{State},
+constructed by \texttt{st}, consists of a register file, program memory, a
+stack, and a heap. The \texttt{push} instruction takes a read operand and pushes
+it onto the stack. The \texttt{pop} instruction pops the top of the stack into a
+write operand. The \texttt{mov} instruction moves a machine word from a read
+operand to a write operand. The \texttt{jump} instruction is parameterized by an
+optional pair, which if present, reads the first element of the pair from a read
+operand, checks if it is zero, and if so sets the ip to the second element of
+the pair, which is a constant pointer. If the condition is not zero, then it
+sets the ip to the instruction pointer contained in the second jump argument. If
+we pass nothing as the first argument, then it becomes an unconditional set of
+the ip to the value read from the second argument.  Note that the second
+argument is a read operand, so can either be a constant or read from a register
+or memory. This means it can be effectively either a direct or indirect jump,
+both of which are used in the compilation of lambda terms. The \texttt{new}
+instruction allocates a contiguous block of new memory and writes the resulting
+pointer to the fresh memory into a write operand. We take the approach of not
+choosing a particular allocation strategy. Instead, we parameterize our proof on
+the existence of such functionality \cite{chlipala}. For simplicity, we assume
+that the allocation function returns completely fresh memory, though it should
+be possible to modify this assumption to be less restrictive, i.e. let it re-use
+heap locations that are no-longer live. The complete semantics of the machine
+are given in Figure~\ref{fig:im_semantics}. Note that we separate instruction steps
+and basic block steps. A basic block is a sequence of instructions that ends
+with a jump, which will set the IP to the next basic block to be evaluated. The
+full out step function will lookup the basic block at that IP, and if the
+basicblock will evaluate to a new state, then the machine will also evaluate to
+that state. 
 
 \begin{figure}
 \begin{lstlisting}
@@ -129,5 +140,6 @@ Inductive step : transition State :=
     step (st rf p s h) sn.
 \end{lstlisting}
 \caption{Instruction Machine Semantics}
+\label{fig:im_semantics}
 \end{figure}
 

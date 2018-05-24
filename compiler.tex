@@ -5,13 +5,13 @@ programs. The program recurses on lambda terms, keeping a current index into the
 program to ensure correct linking without a separate pass. For variables, when
 we get to zero we push the current environment pointer and a null instruction
 pointer to denote the update marker to the location of the closure being
-entered. Then we \texttt{mov} the closure into \texttt{IP} and \texttt{EP},
-recalling that the \texttt{jump} sets the \texttt{IP}. For the nonzero
-variables, we replicate traversing the environment pointer \texttt{i} times
-before loading the closure. For applications, we calculate the program location
-of the argument basic block, and push that and the current environment pointer
-onto the stack, effectively pushing an argument closure on top of the stack. We
-then jump to the left hand side of the application, as is standard for
+entered. Then we \texttt{mov} the closure at that location into \texttt{IP} and
+\texttt{EP}, recalling that the \texttt{jump} sets the \texttt{IP}. For the
+nonzero variables, we replicate traversing the environment pointer \texttt{i}
+times before loading the closure. For applications, we calculate the program
+location of the argument basic block, and push that and the current environment
+pointer onto the stack, effectively pushing an argument closure on top of the
+stack. We then jump to the left hand side of the application, as is standard for
 push-enter evaluation. For abstractions, we choose to use a conditional jump
 depending on whether the top of the stack is a null pointer (and therefore an
 update marker) or a valid instruction pointer (and therefore an argument). If it
