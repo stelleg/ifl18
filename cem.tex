@@ -14,6 +14,19 @@ between them and their binding lambda.
  t &::= t \; t \; | \; x \; | \;  \lambda \; t \\
  x &\in \mathbb{N}
 \end{align*}
+
+Throughout the rest of this paper, we will use Coq code directly to formalize
+some the definition and theorems in the paper. This has the advantage of
+avoiding ambiguities and correctness issues involved in translating to latex.
+For example, the Coq code defining lambda calculus with deBruijn indices is: 
+
+\begin{lstlisting}
+Inductive tm : Type := 
+  | var : nat -> tm 
+  | lam : tm -> tm
+  | app : tm -> tm -> tm.
+\end{lstlisting}
+
 The essence of the $\mathcal{CE}$ semantics is that we implement a shared
 environment, and use its structure to share results of computations. This allows
 for a simple abstract machine which can operate on lambda calculus directly
@@ -45,8 +58,9 @@ closure at that location with the resulting value. The big step semantics are
 described in the standard way by logical relation in Figure~\ref{fig:bigstep}. A
 few notes about definitions used in the semantics: the \texttt{update $\Psi$ x
 v} function replaces the closure at location \texttt{x} in heap $\Psi$ with
-value \texttt{v}. The curly brackets construct a heap cell containing a closure
-and a environment continuation. The \texttt{app} constructor represents an
+value \texttt{v}. The curly brackets (or the \texttt{cl} constructor,
+depending on context) construct a heap cell containing a closure and a
+environment continuation. The \texttt{app} constructor represents an
 application, while the \texttt{var} constructor is a variable constructor and
 $\lambda$ is the constructor for an abstraction. The \texttt{clu} function looks
 up a variable index in the shared environment structure by following environment
@@ -62,6 +76,15 @@ allow reasoning about garbage collection or direct heap-reuse.
 
 \begin{figure}
 \begin{lstlisting}
+Fixpoint clu (v env:nat) (h:heap) : option (nat * cell) := 
+  match lookup env h with
+  | None => None
+  | Some (cl c a) => match v with
+    | S n => clu n a h
+    | 0 => Some (env, cl c a)
+    end
+  end.
+
 Inductive step : conf -> conf -> Type :=
   | Id : $\forall$ M x y z $\Phi$ $\Psi$ v e, 
               clu y e $\Phi$ = Some (x, {M, z}) -> 
