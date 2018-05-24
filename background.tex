@@ -13,7 +13,7 @@ corresponding argument. Call-by-need is an evaluation strategy devised to
 address this shortcoming. By sharing the result of argument evaluation between
 instances of a variable, one avoids duplicated work.  Unsurprisingly,
 call-by-need is the default semantics implemented by compilers for non-strict
-languages like Haskell \cite{stg}. 
+languages like Haskell \cite{jonesstg}. 
 
 Also perhaps unsurprisingly, call-by-need implementations tend to be more
 complicated than their strict counterparts. For example, even attempts at simple
@@ -33,8 +33,8 @@ verification can prove that algorithms implement their specification for
 write down both the specification and the proof in a machine-checked logic
 removes the vast majority of bugs found in hand-written proofs, ensuring far
 higher confidence in correctness than other standard methods. This approach has
-been confirmed to work by other unrelated methods as well, such as fuzz testing
-\cite{fuzz}.
+been confirmed to effectively remove all bugs by other methods as well, such as
+fuzz testing \cite{yangfuzz}.
 
 This approach applies particularly well to compilers. Often, the specification
 for a compiler is relatively easy to write down: source level semantics for some
@@ -45,16 +45,17 @@ amortized return on investment is high: all reasoning about programs compiled
 with a verified compiler is provably preserved. 
 
 Due to the complexities discussed above involved in implementing lazy languages,
-existing work has focused on compiling strict languages \cite{chlipala,
-cakeml, compcert...}. In this work we use the simple $\mathcal{CE}$ machine as a
-base for a verified compiler of a lazy language, using the Coq proof assistant. 
+existing work has focused on compiling strict languages
+\cite{chlipala2007certified, leroy2012compcert, cakeml14}. In this work we use
+the simple $\mathcal{CE}$ machine as a base for a verified compiler of a lazy
+language, using the Coq proof assistant. 
 
 As with many areas of research, the devil is in the details. What exactly
 existing approaches mean when they claim their compilers are verified?
 Essentially, a verified compiler of a functional language is one that preserves
 computation of values. That is, we have a one directional implication that
 \emph{if the source semantics computes a value, then the compiled code computes
-an equivalent value} \cite{chlipala}. The important thing to note is that the
+an equivalent value} \cite{chlipala2007certified}. The important thing to note is that the
 implication is only in one direction. If the source semantics never terminates,
 this class of correctness theorem says nothing about the behavior of the
 compiled code. This has consequences for turing complete source languages. If we
@@ -70,20 +71,20 @@ difficult. Essentially, the induction rules for the abstract machine make
 constructing such a proof monumentally tricky. 
 
 One approach for getting around this issue is to try and capture the divergent
-behavior by defining a diverging semantics explicitly \cite{cakemlesop16}. Then
-we can safely say that \emph{if the source semantics diverges according to our
-diverging semantics, then the compiled code also diverges}. Unfortunately, this
-doesn't quite give us what we want, as we still can't be sure that a value
+behavior by defining a diverging semantics explicitly \cite{functionalbigstep}.
+Then we can safely say that \emph{if the source semantics diverges according to
+our diverging semantics, then the compiled code also diverges}. Unfortunately,
+this doesn't quite give us what we want, as we still can't be sure that a value
 computed by the compiled code corresponds to a value computed by the source
 semantics. Essentially, the issue is that we don't have, and can't hope to have
 for a turing complete language, a constructive proof that for every program it
 evaluates to a value or diverges.  
 
-For this paper, we choose to take the approach of \cite{chlipala} and define
-verification as the first implication above, focusing on the case in which the
-source semantics evaluates to a value. This is still a very strong result: any
-source program that has meaning compiles to an executable with equivalent
-meaning. In addition, if we ever choose to extend the language with a type
-system that ensures termination, or some notion of progress, then we can use
-this proof in combination with our verification proof to prove the other
+For this paper, we choose to take the approach of \cite{chlipala2007certified}
+and define verification as the first implication above, focusing on the case in
+which the source semantics evaluates to a value. This is still a very strong
+result: any source program that has meaning compiles to an executable with
+equivalent meaning. In addition, if we ever choose to extend the language with a
+type system that ensures termination, or some notion of progress, then we can
+use this proof in combination with our verification proof to prove the other
 direction. 

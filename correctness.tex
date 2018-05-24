@@ -7,7 +7,7 @@ relation.
 
 In general, we implement closures as instruction pointer, environment pointer
 pairs. For the instruction pointers, we relate them to terms via the compile
-function defined in Section~\ref{compiler}. Essentially, we require that the
+function defined in Section~\ref{sec:compiler}. Essentially, we require that the
 instruction pointer point to a list of basic blocks that the related term
 compiles to. For the current closure, we relate the instruction pointer in the
 instruction machine to the current term in the small step source semantics. The
@@ -108,7 +108,7 @@ Inductive state_rel (cs : cesm.state) (is : im.State) : Type :=
            (st_p is) (st_st cs) (st_s is) ->
   state_rel cs is.
 \end{lstlisting}
-\caption{Relation Definitions Between Small Step $\mathcal{CE}$ and the
+\caption{Select Relation Definitions Between Small Step $\mathcal{CE}$ and the
 Instruction Machine}
 \label{fig:state_rel}
 \end{figure}
@@ -124,7 +124,7 @@ $i'$.
 Our proof proceeds by case analysis on the step rules for the small step
 semantics. We'll focus on the second half of the proof, that $i'$ is related to
 $s'$. The proofs that $i$ evaluates to $i'$ follow fairly directly from the
-definition given in Section~\ref{compiler}. For the Var rule, because we need to
+definition given in Section~\ref{sec:compiler}. For the Var rule, because we need to
 proceed by induction, we have to proceed by induction on a basicblock while
 ignoring of the program, then use the resulting proof to show that evaluation of
 a compiled variable implements the evaluation of the variable in the small step

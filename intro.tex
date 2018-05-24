@@ -13,29 +13,30 @@ preserved through compilation, and that it won't be prohibitively inefficient.
 Unfortunately, one of the challenges for formalization of non-strict compilers
 is that the semantics of call-by-need abstract machines tend to be complex,
 incorporating complex optimizations into the semantics, requiring preprocessing
-of terms, and closures of variable sizes \cite{stg, TIM}. Fortunately, there has
+of terms, and closures of variable sizes \cite{jonesstg, TIM}. Fortunately, there has
 been recent development of a particularly simple abstract machine for
 call-by-need: the $\mathcal{CE}$ machine \cite{cem}. In addition to being
 exceedingly simple to implement, the machine shows performance often comparable
 to state-of-the-art \cite{cem}.
 
 Verified compilers provide powerful guarantees about the code they generate, and
-its relation to the corresponding source code \cite{chlipala, compcert, cakeml}.
-In particular, for higher order functional languages, they can often ensure that
-the non-trivial task of compiling lambda calculus and its derivatives to machine
-code is implemented correctly, preserving source semantics. There is a sense in
-which the amortized return on investment for verified compilers is high: any
-reasoning about any program which is compiled with a verified compiler is
-provably preserved. 
+its relation to the corresponding source code \cite{chlipala2007certified,
+leroy2012compcert, cakeml14}.  In particular, for higher order functional
+languages, they can often ensure that the non-trivial task of compiling lambda
+calculus and its derivatives to machine code is implemented correctly,
+preserving source semantics. There is a sense in which the amortized return on
+investment for verified compilers is high: any reasoning about any program which
+is compiled with a verified compiler is provably preserved. 
 
 Existing verified compilers have all focused on call-by-value semantics
-\cite{chlipala, compcert, cakeml}. This semantics has the property of being
-historically easier to implement than call-by-need, and therefore likely easier
-to reason about formally. In this paper, we build on recent work developing a
-simple method for implementing call-by-need semantics, enabling us to implement,
-and reason formally about the correctness of, call-by-need. We use the Coq proof
-assistant \cite{coq} to implement and prove the correctness of our compiler. We
-start with a source language of $\lambda$ calculus with deBruijn indices:
+\cite{chlipala2007certified, leroy2012compcert, cakeml14}. This semantics has
+the property of being historically easier to implement than call-by-need, and
+therefore likely easier to reason about formally. In this paper, we build on
+recent work developing a simple method for implementing call-by-need semantics,
+enabling us to implement, and reason formally about the correctness of,
+call-by-need. We use the Coq proof assistant \cite{barras1997coq} to implement
+and prove the correctness of our compiler. We start with a source language of
+$\lambda$ calculus with deBruijn indices:
 \begin{align*}
  t &::= t \; t \; | \; x \; | \;  \lambda \; t \\
  x &\in \mathbb{N}
@@ -48,11 +49,11 @@ Curien's call-by-name calculus of closures.
 
 It may surprise the reader to see that we don't start with a more well-known
 call-by-need semantics; we address this concern in in
-Section~\ref{sec:discussion}.  With the proof of compiler correctness, along
-with the proof that our call-by-name version of the semantics implements
-Curien's call-by-name semantics, should hopefully convince the reader that we
-have indeed implemented a call-by-need semantics, despite not using a more
-well-known definition of call-by-need. 
+Section~\ref{sec:discussion}.  We hope that the proof of compiler correctness,
+along with the proof that our call-by-name version of the semantics implements
+Curien's call-by-name semantics, convinces the reader that we have indeed
+implemented a call-by-need semantics, despite not using a more well-known
+definition of call-by-need. 
 
 For our target, we define a simple instruction machine, described in
 Section~\ref{sec:im_semantics}. This simple target allows us to describe the
@@ -73,7 +74,7 @@ The paper is structured as follows. In Section~\ref{sec:background} we give the
 necessary background for the paper. In Section~\ref{sec:cem_big} we describe the
 source syntax and semantics (the big-step $\mathcal{CE}$ semantics) in detail.
 We also use this section to define a call-by-name version of the semantics, and
-show that it implements Curien's calculus of closures \cite{curien}.  In
+show that it implements Curien's calculus of closures \cite{curien1991abstract}.  In
 Section~\ref{sec:cem_small} we describe the small step $\mathcal{CE}$ semantics
 and their relation to the big-step semantics. In Section~\ref{sec:im_semantics}
 we describe the instruction machine syntax and semantics. In

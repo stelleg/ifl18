@@ -1,8 +1,8 @@
-\section{Small Step Source Semantics} \label{sec:cem_small}
+\section{$\mathcal{CE}$ Small Step Semantics} \label{sec:cem_small}
 
 In this section we discuss the small step semantics of the $\mathcal{CE}$
 machine, and show that they implement the big step semantics of
-Section~\ref{cem}. This is a fairly straightforward transformation implemented
+Section~\ref{sec:cem_big}. This is a fairly straightforward transformation implemented
 by adding a stack. The source langauge is the same, and we simply add a stack to
 our configuration (and call it a state). The stack elements are either argument
 closures (\texttt{inr}) or update markers (\texttt{inl}). Update markers
@@ -40,7 +40,7 @@ Inductive step : transition state :=
   st $\Phi$ (inl (close n e)::s) (close m e)
 where " c1 '->_s' c2 " := (step c1 c2).
 \end{lstlisting}
-\caption{Small Step Semantics}
+\caption{Small Step $\mathcal{CE}$ Semantics}
 \label{fig:cesm}
 \end{figure}
 
@@ -53,7 +53,7 @@ it is generally a superficial change.
 
 \subsection{Relation to Big Step}
 Here we prove that the small step semantics implement the big step semantics of
-Section~\ref{cem}. This requires first a notion of reflexive transitive closure,
+Section~\ref{sec:cem_big}. This requires first a notion of reflexive transitive closure,
 which we define in the standard way. We also make use of the fact that the
 reflexive transitive closure can be defined equivilantly to extend from the left
 or right. 

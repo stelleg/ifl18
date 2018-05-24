@@ -56,8 +56,8 @@ language. Still, the conversion between lambda calculus with named variables and
 lambda calculus with deBruijn indices is a well understood topic, and we'd argue
 that it's not particularly interesting in the context of a verified compiler.
 Indeed, as noted below, semantics using named variables and substitution can be
-hard to get right \cite{launchbury_formal_breitner, japanese_cbn}, so we stand
-by our decision to relate to a semantics based on lambda calculus with deBruijn
+hard to get right \cite{breitnerthesis, nakata2009small}, so we stand by our
+decision to relate to a semantics based on lambda calculus with deBruijn
 indices, namely Curien's calculus of closures. One potential approach for future
 work would be to prove that a call-by-name semantics using substition is
 equivalent to Curien's calculus of closures, which when combined with a proof
@@ -68,20 +68,20 @@ A third thread to the validity of this work is the question of whether or not
 we've really proved that we've implemented \emph{call-by-need}. The question
 naturally arises of what exactly it means to prove an implementation of
 call-by-need is correct. There are certainly well-established semantics
-\cite{launchbury, ariola}, so one option would be to directly prove that the
-$\mathcal{CE}$ semantics implement one of those existing semantics.
-Unfortunately, recent work has shown that both of these have small issues that
-arise when formalized that require fixes. Indeed, we did stray down this path a
-good ways and discovered one of these issues which has been previously
-discovered in the literature \cite{japanese_cbn}. This raises the question of
-whether or not semantics that aren't obviously correct are a good base for what
-it means to be a call-by-need semantics. Instead, we've chosen to relate our
-call-by-name semantics formally to a semantics that is obviously correct,
-Curien's calculus of closures. Along with the tiny modification required for
-memoization of results, we hope that we've convinced the reader that it is
-\emph{extremely likely} that the memoization of results is correct. Of course,
-further evidence such as examples of correct evaluation would go further to
-convince the reader, and for that we encourage readers to
+\cite{launchburynatural, ariola1995call}, so one option would be to directly
+prove that the $\mathcal{CE}$ semantics implement one of those existing
+semantics.  Unfortunately, recent work has shown that both of these have small
+issues that arise when formalized that require fixes. Indeed, we did stray down
+this path a good ways and discovered one of these issues which has been
+previously discovered in the literature \cite{nakata2009small}. This raises the
+question of whether or not semantics that aren't obviously correct are a good
+base for what it means to be a call-by-need semantics. Instead, we've chosen to
+relate our call-by-name semantics formally to a semantics that is obviously
+correct, Curien's calculus of closures. Along with the tiny modification
+required for memoization of results, we hope that we've convinced the reader
+that it is \emph{extremely likely} that the memoization of results is correct.
+Of course, further evidence such as examples of correct evaluation would go
+further to convince the reader, and for that we encourage readers to
 play with a toy implementation at \url{https://github.com/stelleg/cem\_pearl}.
 Finally, a more convincing result would be a proof that the call-by-need
 semantics implement the call-by-name semantics, but with  
@@ -126,3 +126,30 @@ Another exciting area of future work is powerful proofs of type preservation
 through compilation.  While there has been existing work on type-preserving
 compilers, fully verified compilers like this one provide such a strong property
 that type-safety should fall out directly.
+
+\subsection{Related Work}
+
+Chlipala implements a compiler from a STLC to a simple instruction machine in
+\cite{chlipala2007certified}. In many ways it is more sophisticated than this
+work: it converts to CPS, performs closure conversion, and proves a similar
+compiler correctness theorem to the one we've proved here. The primary
+difference is that we've defined a call-by-need compiler, which forces us to
+reason about updating thunks in the heap, a challenge not shared by
+call-by-value implementations.
+
+Breitner shows in \cite{breitnerthesis} one way to formalize Launchbury's
+natural semantics \cite{launchburynatural} and prove an optimization is sound
+with respect to the semantics. By relating his formalization with ours, these
+projects could be combined to prove a more sophisticated compiler correct: one
+with non-trivial optimizations applied.
+
+CakeML \cite{cakeml14} is a verified compiler for a large subset of the Standard
+ML language formalized in HOL4 \cite{slind2008brief}. Like Chlipala's work, this
+is a call-by-value language, though they prove correctness down to an x86
+machine model, and are working with a much larger real-world source language.
+They also make divergence arguments along the lines of \cite{functionalbigstep},
+strengthening their correctness theorem in the presence of nontermination in
+comparison to this work.
+
+
+
