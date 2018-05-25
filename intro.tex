@@ -22,7 +22,7 @@ state-of-the-art.
 Verified compilers provide powerful guarantees about the code they generate and
 its relation to the corresponding source code \cite{chlipala2007certified,
 leroy2012compcert, cakeml14}.  In particular, for higher order functional
-languages, they can often ensure that the non-trivial task of compiling lambda
+languages, they can ensure that the non-trivial task of compiling lambda
 calculus and its derivatives to machine code is implemented correctly,
 preserving source semantics. The amortized return on investment for verified
 compilers is high: any reasoning about any program which is compiled with a
@@ -79,13 +79,11 @@ Section~\ref{sec:cem_small} we describe the small-step $\mathcal{CE}$ semantics
 and its relation to the big-step semantics. In Section~\ref{sec:im_semantics}
 we describe the instruction machine syntax and semantics. In
 Section~\ref{sec:compiler} we describe the compilation from machine terms to
-assembly language. In Section~\ref{sec:correctness} we describe how evaluation
-of compiled programs is related to the small-step $\mathcal{CE}$ semantics. the
-compilation of terms into assembly language, and the instruction machine
-semantics, and finally compose this proof with the proof that the small-step
-semantics implement the big-step semantics to show that the instruction machine
-implements the big-step semantics. In Section~\ref{sec:discussion} we discuss
-threats to validity, future work, and related work. We conclude in
-Section~\ref{sec:conclusion}. The Coq source code with all the definitions and
-proofs described in this document is available at
-\url{https://github.com/stelleg/cem\_coq}. 
+assembly language. In Section~\ref{sec:correctness} we describe how the evaluation
+of compiled programs is related to the small-step $\mathcal{CE}$ semantics. We
+compose this proof with the proof that the small-step semantics implement the
+big-step semantics to show that the instruction machine implements the big-step
+semantics. In Section~\ref{sec:discussion} we discuss threats to validity,
+future work, and related work. We conclude in Section~\ref{sec:conclusion}. The
+Coq source code with all the definitions and proofs described in this document
+is available at \url{https://github.com/stelleg/cem\_coq}. 

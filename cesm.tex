@@ -5,18 +5,18 @@ machine, and show that it implements the big-step semantics of
 Section~\ref{sec:cem_big}. This is a fairly straightforward transformation implemented
 by adding a stack. The source language is the same, and we simply add a stack to
 our configuration (and call it a state). The stack elements are either argument
-closures (\texttt{inr}) or update markers (\texttt{inl}). Update markers
-locations are pushed onto the stack when a variable dereferences that location
-in the heap. When they are popped by an abstraction, that location is replaced
-by said abstraction, so that later dereferences by the same variable in
-the same scope dereference the value, and do not repeat the computation. Argument
-closures are pushed onto the stack by applications, with the same environment
-pointer duplicated in the current closure and the argument closure. Argument
-closures are popped off the stack by abstractions, which allocate a fresh memory
-location, write the argument closure to it, write the environment continuation
-as the current environment pointer, then enter the body of the abstraction with
-the fresh environment pointer. This is the mechanism used for extending the
-shared environment structure. The semantics is defined formally in
+closures (\texttt{inl}) or update markers (\texttt{inr}). Update markers
+are pushed onto the stack when a variable dereferences that location in the
+heap. When they are popped by an abstraction, the closure at that location is
+replaced by said abstraction, so that later dereferences by the same variable in
+the same scope dereference the value, and do not repeat the computation.
+Argument closures are pushed onto the stack by applications, with the same
+environment pointer duplicated in the current closure and the argument closure.
+Argument closures are popped off the stack by abstractions, which allocate a
+fresh memory location, write the argument closure to it, write the environment
+continuation as the current environment pointer, then enter the body of the
+abstraction with the fresh environment pointer. This is the mechanism used for
+extending the shared environment structure. The semantics is defined formally in
 Figure~\ref{fig:cesm}. The \texttt{update} function replaces a closure in a heap
 cell with the specified closure.  
 
@@ -74,11 +74,11 @@ ensure that the Upd rule applies we use the fact that the big-step semantics
 only evaluates to abstraction configurations, and the fact that the reflexive
 transitive closure can be rewritten with steps on the right. For the Application
 rule, we take advantage of the fact that we can append two evaluations together,
-as well as extend a closure from the front or the rear. As with the Var rule we
-use the fact that the induction rule is defined for all stacks to ensure we
-evaluate the left hand side to a value with the argument on the top of the
-stack.  Finally, we extend the environment with the argument closure, and
-evaluate the result to a value by the second induction hypothesis.
+as well as extend a reflexive transitive closure from the left or the right. As
+with the Var rule we use the fact that the induction rule is defined for all
+stacks to ensure we evaluate the left hand side to a value with the argument on
+the top of the stack.  Finally, we extend the environment with the argument
+closure, and evaluate the result to a value by the second induction hypothesis.
 \end{proofoutline}
 
 Adding a stack in this fashion is a standard approach to converting between big

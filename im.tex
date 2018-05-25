@@ -4,11 +4,11 @@ Here we describe in full the instruction machine syntax and semantics. We
 choose a simple stack machine with a Harvard architecture (with separate
 instruction and heap memory). We use natural numbers for pointers, though it
 shouldn't be too difficult to replace these with standard-sized machine words,
-e.g., 64 bits, along with making the stack and malloc operations partial. Our
-stack is represented as a list of pointers, though again it should be a
-relatively straightforward exercise to represent the stack in main memory. As
-with the machine word size, we would need to make push operations partial to
-represent stacks this way. We define our machine to have only four registers: an
+e.g., 64 bits, making the stack and malloc operations partial. Our stack is
+represented as a list of pointers, though again it should be a relatively
+straightforward exercise to represent the stack in main memory. With the fixed
+machine word size, we would need to make push operations partial to represent
+stacks this way. We define our machine to have only four registers: an
 instruction pointer, an environment pointer, and two scratch registers. Our
 instruction set is minimal, consisting only of a conditional \texttt{jump}
 instruction, \texttt{pop} and \texttt{push} instructions, a \texttt{mov}
@@ -58,13 +58,13 @@ Definition Program := list BasicBlock.
 \end{figure}
 
 We separate read (\texttt{RO}) and write (\texttt{WO}) operands. Write
-operands can be registers (\texttt{WR}) or memory (\texttt{WM}). Read registers
+operands can be registers (\texttt{WR}) or memory (\texttt{WM}). Read operands
 can be any write operand (\texttt{RW}) or a constant (\texttt{RC}). For reading,
 we have a \texttt{read} relation, which takes a read operand and a state and is
 inhabited when the third argument can be read from that read operand in that
-state. Similarly, a \texttt{write} relation which is inhabited when writing the
-second argument into the first in a state defined by the third argument results
-in the state defined by the fourth argument.  
+state. Similarly, a \texttt{write} relation is inhabited when writing the second
+argument into the first in a state defined by the third argument results in the
+state defined by the fourth argument.  
 
 The machine semantics should be fairly unsurprising. A \texttt{State},
 constructed by \texttt{st}, consists of a register file, program memory, a
@@ -73,11 +73,11 @@ it onto the stack. The \texttt{pop} instruction pops the top of the stack into a
 write operand. The \texttt{mov} instruction moves a machine word from a read
 operand to a write operand. The \texttt{jump} instruction is parameterized by an
 optional pair, which, if present, reads the first element of the pair from a read
-operand, checks if it is zero, and if so sets the ip to the second element of
+operand, checks if it is zero, and if so sets the IP to the second element of
 the pair, which is a constant pointer. If the condition is not zero, then it
-sets the ip to the instruction pointer contained in the second jump argument. If
+sets the IP to the instruction pointer contained in the second jump argument. If
 we pass nothing as the first argument, then it becomes an unconditional set of
-the ip to the value read from the second argument.  Note that the second
+the IP to the value read from the second argument.  Note that the second
 argument is a read operand, so it can either be a constant or read from a register
 or memory. This means it can be effectively either a direct or indirect jump,
 both of which are used in the compilation of lambda terms. The \texttt{new}
