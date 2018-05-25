@@ -1,27 +1,27 @@
 \section{Instruction Machine} \label{sec:im_semantics}
 
 Here we describe in full the instruction machine syntax and semantics. We
-choose a simple stack machine with a Harvard architecture, with separate
-instruction and heap memory. We use natural numbers for pointers, though it
+choose a simple stack machine with a Harvard architecture (with separate
+instruction and heap memory). We use natural numbers for pointers, though it
 shouldn't be too difficult to replace these with standard-sized machine words,
-e.g. 64 bits, along with making the stack and malloc operations partial. Our
+e.g., 64 bits, along with making the stack and malloc operations partial. Our
 stack is represented as a list of pointers, though again it should be a
 relatively straightforward exercise to represent the stack in main memory. As
-with the machine word size, we'd need to make push operations partial to
-represent stacks this way. We define our machine to have only 4 registers: an
+with the machine word size, we would need to make push operations partial to
+represent stacks this way. We define our machine to have only four registers: an
 instruction pointer, an environment pointer, and two scratch registers. Our
 instruction set is minimal, consisting only of a conditional \texttt{jump}
 instruction, \texttt{pop} and \texttt{push} instructions, a \texttt{mov}
 instruction, and a \texttt{new} instruction for allocating new memory. Note that
 for our program memory, we have pointers to basic blocks, but for simplicity of
-proofs we choose to not to point to increment the instruction pointer within a
-basic block.  Instead, the instruction pointer is constant within a basic
-block, only changing between basic blocks. In fact, we represent the program as
-a list of basic blocks, with pointers indexing into the list. This has the
-advantage of being able to easily reason about sublists and their relation to
-terms. As with other design decisions, this also should be fairly unproblematic
-for formalization to a more realistic hardware design. The full syntax of the
-machine is given in Figure~\ref{fig:im_syntax}.  
+proofs we choose to not increment the instruction pointer within a basic block.
+Instead, the instruction pointer is constant within a basic block, only changing
+between basic blocks. In fact, we represent the program as a list of basic
+blocks, with pointers indexing into the list. This has the advantage of letting
+us easily reason about sublists and their relation to terms. As with other
+design decisions, this also should be fairly unproblematic for formalization to
+a more realistic hardware design. The full syntax of the machine is given in
+Figure~\ref{fig:im_syntax}.  
 
 \begin{figure}
 \begin{lstlisting}
@@ -57,7 +57,7 @@ Definition Program := list BasicBlock.
 \label{fig:im_syntax}
 \end{figure}
 
-Note we separate read (\texttt{RO}) and write (\texttt{WO}) operands. Write
+We separate read (\texttt{RO}) and write (\texttt{WO}) operands. Write
 operands can be registers (\texttt{WR}) or memory (\texttt{WM}). Read registers
 can be any write operand (\texttt{RW}) or a constant (\texttt{RC}). For reading,
 we have a \texttt{read} relation, which takes a read operand and a state and is
@@ -72,13 +72,13 @@ stack, and a heap. The \texttt{push} instruction takes a read operand and pushes
 it onto the stack. The \texttt{pop} instruction pops the top of the stack into a
 write operand. The \texttt{mov} instruction moves a machine word from a read
 operand to a write operand. The \texttt{jump} instruction is parameterized by an
-optional pair, which if present, reads the first element of the pair from a read
+optional pair, which, if present, reads the first element of the pair from a read
 operand, checks if it is zero, and if so sets the ip to the second element of
 the pair, which is a constant pointer. If the condition is not zero, then it
 sets the ip to the instruction pointer contained in the second jump argument. If
 we pass nothing as the first argument, then it becomes an unconditional set of
 the ip to the value read from the second argument.  Note that the second
-argument is a read operand, so can either be a constant or read from a register
+argument is a read operand, so it can either be a constant or read from a register
 or memory. This means it can be effectively either a direct or indirect jump,
 both of which are used in the compilation of lambda terms. The \texttt{new}
 instruction allocates a contiguous block of new memory and writes the resulting
@@ -87,15 +87,15 @@ choosing a particular allocation strategy. Instead, we follow existing
 approaches and parameterize our proof on the existence of such functionality
 \cite{chlipala2007certified}. For simplicity, we assume that the allocation
 function returns completely fresh memory, though it should be possible to modify
-this assumption to be less restrictive, i.e. let it re-use heap locations that
-are no-longer live. The complete semantics of the machine are given in
+this assumption to be less restrictive, i.e., let it re-use heap locations that
+are no longer live. The complete semantics of the machine is given in
 Figure~\ref{fig:im_semantics}.  Note that we separate instruction steps and
 basic block steps. Recall that a basic block is a sequence of instructions that
 ends with a jump. The \texttt{step\_bb} relation will execute the instructions
 in the basic block in order, then set the IP in accordance with the
-\texttt{jump} semantics. The \texttt{step} relation looks the basic block at the
-current IP, and if executing the basicblock results in a new state, then the
-machine executes to that state. 
+\texttt{jump} semantics. The \texttt{step} relation dereferences a basic block
+at the current IP, and if executing the basic block results in a new state, then
+the machine executes to that state. 
 
 \begin{figure}
 \begin{lstlisting}

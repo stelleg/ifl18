@@ -1,7 +1,7 @@
 \section{Discussion} \label{sec:discussion}
 
-Here we discuss the paper, including threats to validity, future work, related
-work, and general discussion of the results.
+Here we reflect on what we have accomplished, including threats to validity,
+future work, related work, and general discussion of the results.
 
 One thing we'd like to communicate is the difficulty we had in writing
 comprehensible proofs. The reader is discouraged from attempting to understand
@@ -23,7 +23,7 @@ properties, and have that reasoning preserved through compilation.
 
 \subsection{Threats to Validity} \label{sec:threats}
 
-There are a few primary threats to validity that we address in this section. The
+There are a few potential threats to validity that we address in this section. The
 first is the one mentioned in Section~\ref{sec:background}, that we only show
 that our compiler is correct in the case of termination of the source semantics.
 In other words, if the source semantics doesn't terminate, we can say nothing
@@ -39,7 +39,7 @@ possible analyses that could say things along the lines of \emph{if} the source
 program terminates, then we can conclude $x$. We claim these cases are rare, and
 therefore the provided proof of correctness still provides the desired
 properties for most use cases. As mentioned before, this is also a common
-problem for verified compilation of functional languages. We have yet to see a
+problem for verified compilation of functional languages. We are unaware of a
 verified compiler that proves the implication in both directions. 
 
 Another potential threat to validity is the use of a high level instruction
@@ -53,9 +53,9 @@ As a dual to the issue of a high level instruction machine language, some
 readers may take issue with calling lambda calculus with deBruijn indices a
 "source language". Indeed, we do not advocate writing programs in such a
 language. Still, the conversion between lambda calculus with named variables and
-lambda calculus with deBruijn indices is a well understood topic, and we'd argue
-that it's not particularly interesting in the context of a verified compiler.
-Indeed, as noted below, semantics using named variables and substitution can be
+lambda calculus with deBruijn indices is a well understood topic, it is not
+particularly interesting in the context of a verified compiler.  Indeed, as
+noted below, semantics using named variables and substitution can be
 hard to get right \cite{breitnerthesis, nakata2009small}, so we stand by our
 decision to relate to a semantics based on lambda calculus with deBruijn
 indices, namely Curien's calculus of closures. One potential approach for future
@@ -64,62 +64,62 @@ equivalent to Curien's calculus of closures, which when combined with a proof
 that our call-by-need implements our call-by-name, would prove the compiler
 implements the semantics of a standard lambda calculus with named variables.
 
-A third thread to the validity of this work is the question of whether or not
-we've really proved that we've implemented \emph{call-by-need}. The question
+A third threat to the validity of this work is the question of whether 
+we have really proved that we have implemented \emph{call-by-need}. The question
 naturally arises of what exactly it means to prove an implementation of
 call-by-need is correct. There are certainly well-established semantics
 \cite{launchburynatural, ariola1995call}, so one option would be to directly
-prove that the $\mathcal{CE}$ semantics implement one of those existing
+prove that the $\mathcal{CE}$ semantics implements one of those existing
 semantics.  Unfortunately, recent work has shown that both of these have small
 issues that arise when formalized that require fixes. Indeed, we did stray down
 this path a good ways and discovered one of these issues which has been
-previously discovered in the literature \cite{nakata2009small}. This raises the
+previously described in the literature \cite{nakata2009small}. This raises the
 question of whether or not semantics that aren't obviously correct are a good
-base for what it means to be a call-by-need semantics. Instead, we've chosen to
+base for what it means to be a call-by-need semantics. Instead, we have chosen to
 relate our call-by-name semantics formally to a semantics that is obviously
 correct, Curien's calculus of closures. Along with the tiny modification
-required for memoization of results, we hope that we've convinced the reader
+required for memoization of results, we hope that we have convinced the reader
 that it is \emph{extremely likely} that the memoization of results is correct.
 Of course, further evidence such as examples of correct evaluation would go
 further to convince the reader, and for that we encourage readers to
 play with a toy implementation at \url{https://github.com/stelleg/cem\_pearl}.
 Finally, a more convincing result would be a proof that the call-by-need
-semantics implement the call-by-name semantics, but with  
+semantics implement the call-by-name semantics. 
 
 Yet another threat to validity is our approach (or lack of approach) to
 heap-reuse. For simplicity, we have assumed that our fresh locations are fresh
 with respect to all existing bindings in the heap. Of course, this is
 unsatisfactory when compared to real implementations. It would be preferable to
 have our freshness constraint relaxed to only be fresh with respect to live
-bindings on the heap. We claim that this modification should be possible, at the
-cost of increased complexity in the proofs. 
+bindings on the heap. We believe that this modification should be possible, at
+the cost of increased complexity in the proofs. 
 
 \subsection{Future Work}
 
-In addition to some of the future work discussed as ways of addressing issues in
+In addition to some of the future work discussed as ways of addressing issues 
 in Section~\ref{sec:threats}, there are some additional features that we think
 make for exciting areas of future work. 
 
 One such area is reasoning about preservation of operational properties such as
 time and space requirements. This would enable reasoning about time and space
 properties at the source level and ensuring that these are preserved through
-compilation. In addition, there has been growing interested in verified
+compilation. In addition, there has been growing interest in verified
 optimizations, where one can prove that some optimizations are both
 \emph{correct}, in that they provably preserve semantics, and \emph{true}
 optimizations, in that they only improve performance with respect to some
 performance model. By defining a baseline compiler and proving that it preserved
-operational properties like time and space usage, one would provide a good
+operational properties such as time and space usage, one would have a good
 platform for which to apply this class of optimizations, resulting in a full
 compiler with verified bounds on time and space consumption. As with
 correctness, reasoning about operational properties is often likely to be easier
-in the context of the easy-to-reason about high level semantics, and having that
+in the context of the easy-to-reason-about high level semantics, and having that
 reasoning provably preserved would be extremely valuable. 
 
 Those familiar with Coq may have noticed that in general we operate in the
 \texttt{Type} universe instead of the \texttt{Prop}. This is largely due to the
 desire to eventually do computation on the proof structures defined here,
 towards the goal of proving operational properties. For example, by operating on 
-the big step relation data structure, one could compute time and space
+the big-step relation data structure, one could compute time and space
 requirements for a program evaluation.
 
 Another exciting area of future work is powerful proofs of type preservation
@@ -130,7 +130,7 @@ that type-safety should fall out directly.
 \subsection{Related Work}
 
 Chlipala implements a compiler from a STLC to a simple instruction machine in
-\cite{chlipala2007certified}. In many ways it is more sophisticated than this
+\cite{chlipala2007certified}. In many ways it is more sophisticated than our 
 work: it converts to CPS, performs closure conversion, and proves a similar
 compiler correctness theorem to the one we've proved here. The primary
 difference is that we've defined a call-by-need compiler, which forces us to

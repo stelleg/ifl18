@@ -1,14 +1,14 @@
-\section{$\mathcal{CE}$ Big Step Semantics} \label{sec:cem_big}
+\section{$\mathcal{CE}$ Big-Step Semantics} \label{sec:cem_big}
 
-In this section we define with our big step source semantics. Big step semantics
-have the advantage of powerful, easy to use induction properties. This eases
-reasoning about many program properties. We'll also define a small step
-semantics and prove that it implements the big step semantics, but by showing
+In this section we define our big-step source semantics. Big-step semantics
+has the advantage of powerful, easy-to-use induction properties. This eases
+reasoning about many program properties. We shall also define a small-step
+semantics and prove that it implements the big-step semantics, but by showing
 that our implementation preserves the big-step semantics, we prove preservation
 of any inductive reasoning on the structure of evaluation tree.  
 
 As discussed in Section~\ref{sec:introduction}, our source syntax is lambda calculus with
-deBruijn indices. deBruijn indices count the number of intermediate lambdas
+deBruijn indices. DeBruijn indices count the number of intermediate lambdas
 between them and their binding lambda.  
 \begin{align*}
  t &::= t \; t \; | \; x \; | \;  \lambda \; t \\
@@ -16,8 +16,8 @@ between them and their binding lambda.
 \end{align*}
 
 Throughout the rest of this paper, we will use Coq code directly to formalize
-some the definition and theorems in the paper. This has the advantage of
-avoiding ambiguities and correctness issues involved in translating to latex.
+some of the definition and theorems in the paper. This has the advantage of
+avoiding ambiguities and correctness issues involved in translating to \LaTeX.
 For example, the Coq code defining lambda calculus with deBruijn indices is: 
 
 \begin{lstlisting}
@@ -29,12 +29,12 @@ Inductive tm : Type :=
 
 The essence of the $\mathcal{CE}$ semantics is that we implement a shared
 environment, and use its structure to share results of computations. This allows
-for a simple abstract machine which can operate on lambda calculus directly
+for a simple abstract machine which can operate on lambda calculus directly,
 which is uncommon among call-by-need abstract machines
 \cite{jonesstg,launchburynatural,TIM,johnsson1984efficient}. This simplifies
-formalization, as we don't need to prove that these transformations are
+formalization, as we do not need to prove that these transformations are
 semantics-preserving. Another advantage to the $\mathcal{CE}$ machine is that it
-has constant sized closures, preventing the need to reason about re-allocating
+has constant sized closures, obviating the need to reason about re-allocating
 the results of computation and adding indirections due to closure size changes
 from thunk to value \cite{jonesstg}. We operate on closures, which combine terms with
 pointers into the shared environment, which is implemented as a heap. Every heap
@@ -45,7 +45,7 @@ structure, and if/when a dereferenced location evaluates to a value, the
 original closure (potentially a thunk or closure not evaluated to WHNF) will be
 replaced with said value. The binding of a new variable extends the shared
 environment structure with a new cell. This is done by application, which
-evaluate the left hand side to an
+evaluates the left hand side to an
 abstraction, then extend the environment with the argument term closed under the
 environment pointer at the environment of the application. The application rule
 enforces the fact that two variables bound to the same argument closure will
@@ -54,7 +54,7 @@ same location by construction of the shared environment, we can update that
 location with the value computed at the first variable dereference, and then
 each subsequent dereference will point to this value. The variable rule applies
 the update by indexing into the shared environment structure and replacing the
-closure at that location with the resulting value. The big step semantics are
+closure at that location with the resulting value. The big-step semantics is
 described in the standard way by logical relation in Figure~\ref{fig:bigstep}. A
 few notes about definitions used in the semantics: the \texttt{update $\Psi$ x
 v} function replaces the closure at location \texttt{x} in heap $\Psi$ with
@@ -68,11 +68,12 @@ continuation pointers. The $\langle \Phi \rangle \texttt{c}$ notation constructs
 a configuration from a heap $\Phi$ and a closure \texttt{c}. Note that we
 require that fresh heap locations are greater than zero. This is required for
 reasoning about compilation to the instruction machine, which we will return to
-in Section~\ref{sec:im_semantics}. \texttt{isfresh} for this paper is defined as $f \notin
-dom \big( \Psi \big)$. Of course, for a real implementation, this is far too strong a
-constraint, as it doesn't allow any sort of heap re-use. We return to this issue
-in Section~\ref{sec:discussion}, and discuss how this could be relaxed to either
-allow reasoning about garbage collection or direct heap-reuse.
+in Section~\ref{sec:im_semantics}. The \texttt{isfresh} relation is defined as
+$f \notin dom \big( \Psi \big)$. Of course, for a real implementation, this is
+far too strong a constraint, as it doesn't allow any sort of heap re-use. We
+return to this issue in Section~\ref{sec:discussion}, and discuss how this could
+be relaxed to either allow reasoning about garbage collection or direct
+heap-reuse.
 
 \begin{figure}
 \begin{lstlisting}
@@ -107,40 +108,40 @@ where " c1 '$\Downarrow$' c2 " := (step c1 c2).
 In addition to the above description there are some important properties to
 notice for the purpose of verification. One is that we specify that in addition
 to requiring that a heap location for a new bound closure is fresh, we require
-that the it is positive. While not necessary for the correctness of the
+that it is positive. While not necessary for the correctness of the
 semantics, this will be useful later when defining a relation between the heap
-described here and the machine code heap, ensuring that we don't artificially
-extend the empty environment. It's also worth noting that while the closures in
+described here and the machine code heap, ensuring that we do not artificially
+extend the empty environment. It is also worth noting that while the closures in
 the heap cells are mutable, the shared environment structure is never mutated.
 This property is crucial when reasoning about variable dereferences. 
 
-The fact that our natural semantics are defined on lambda calculus with deBruijn
+The fact that our natural semantics is defined on lambda calculus with deBruijn
 tindices differs from most existing definitions of call-by-need, such as
 Ariola's call-by-need \cite{ariola1995call} or Launchbury's lazy semantics
 \cite{launchburynatural}. These semantics are defined on lambda calculus with named
 variables. While it should be possible to relate our semantics to these
 \footnote{Both of these well known existing semantics have known problems, as
-discussed in Section~\ref{sec:discussion}}, it is certainly made more difficult by
-this disparity. A more fruitful relation to semantics operating on lambda
-calculus with named variables would likely be relating curiens calculus of
-closures to call-by-name semanticss implemented with substitution. We'll return
-to this discussion in Section~\ref{sec:discussion}.
+discussed in Section~\ref{sec:discussion}}, the comparison is certainly made
+more difficult by this disparity. A more fruitful relation to semantics
+operating on lambda calculus with named variables would likely be relating
+Curien's calculus of closures to call-by-name semantics implemented with
+substitution. We return to this discussion in Section~\ref{sec:discussion}.
 
-As mentioned in Section~\ref{sec:introduction}, these big step semantics don't explicitly
-include a notion of nontermination. Instead, nontermination would be implied by
-the negation of the existence of an evaluation relation. This prevents reasoning
-directly about nontermination in an inductive way, but for our the purpose of
-our primary lemma this is fine. 
+As mentioned in Section~\ref{sec:introduction}, these big step semantics do not
+explicitly include a notion of nontermination. Instead, nontermination would be
+implied by the negation of the existence of an evaluation relation. This
+prevents reasoning directly about nontermination in an inductive way, but for
+the purpose of our primary theorem this is fine. 
 
 One interesting property of defining an inductive evaluation relation in a
-language like Coq is that we can do computation on the evaluation tree. In other
+language such as Coq is that we can do computation on the evaluation tree. In other
 words, the evaluation relation given above defines a data type, one that we can
 do computation on in standard ways. For example, we could potentially compute
-properties like size and depth, which would be related to operational properties
+properties such as size and depth, which would be related to operational properties
 of compiled code. We hope in future work to explore this approach further.
 
-Finally, given a term $t$, we define the initial configuratoin as $\langle [] \rangle
-\texttt{close t 0}$. As discussed, the choice of the null pointer for the envioronment
+Finally, given a term $t$, we define the initial configuration as $\langle [] \rangle
+\texttt{close t 0}$. As discussed, the choice of the null pointer for the environment
 pointer is not arbitrary, but chosen across our semantics uniformly to represent
 failed environment lookup. 
 
@@ -152,7 +153,7 @@ closures \cite{curien1991abstract}.
 
 See Figure~\ref{fig:bigstepname} for the definition of our call-by-name
 semantics. Note that the only change from our call-by-need semantics is that we
-don't update the heap location with the result of the dereferenced computation.
+do not update the heap location with the result of the dereferenced computation.
 This is the essence of the difference between call-by-name and call-by-need.
 
 A well known existing call-by-name semantics is Curien's calculus of closures
@@ -235,11 +236,12 @@ where " c1 '$\Downarrow$' c2 " := (step c1 c2).
 
 By proving that Curien's semantics is implemented by the call-by-name variant of
 our semantics, we provide further evidence that our call-by-need is a
-meaningful semantics. While eventually we'd like to prove that the call-by-need
-semantics implement an optimization of the call-by-name, we leave that for
-future work.
+meaningful semantics. While eventually we would like to prove that the
+call-by-need semantics implements an optimization of the call-by-name, we leave
+that for future work.
 
 One imporant note is that nowhere do we require that a term being evaluated is
-complete closed by its environment. Indeed, we don't and it's possible that a
-term with free variables can be evaluated by both semantics. This theme will
-recur through the rest of the paper, so it's worth keeping in mind.  
+closed by its environment. Indeed, it's possible that a term with free variables
+can be evaluated by both semantics to a value as long as the free variable is
+never dereferenced. This theme will recur through the rest of the paper, so it
+is worth keeping in mind.  

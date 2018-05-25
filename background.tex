@@ -1,29 +1,28 @@
 \section{Background} \label{sec:background}
 
-Programming languages can be roughly broken into two camps: those with
+Programming languages can roughly be broken into two camps: those with
 \emph{strict} and those with \emph{non-strict} semantics. A strict language is
 one in which arguments at a call-site are always evaluated, while a non-strict
 language only evaluates arguments when they are needed. One can further break
 non-strict into two categories: call-by-name and call-by-need. Call-by-name is
 essentially evaluation by substitution: an argument term or closure is
 substituted for every instance of a corresponding variable. This has the
-downside that it can result in exponential slowdown due to repeated work when
-compared to a strict language: every variable dereference must re-evaluate the
-corresponding argument. Call-by-need is an evaluation strategy devised to
-address this shortcoming. By sharing the result of argument evaluation between
-instances of a variable, one avoids duplicated work.  Unsurprisingly,
-call-by-need is the default semantics implemented by compilers for non-strict
-languages like Haskell \cite{jonesstg}. 
+downside that it can result in exponential slowdown due to repeated work: every
+variable dereference must re-evaluate the corresponding argument. Call-by-need
+is an evaluation strategy devised to address this shortcoming. By sharing the
+result of argument evaluation between instances of a variable, one avoids
+duplicated work.  Unsurprisingly, call-by-need is the default semantics
+implemented by compilers for non-strict languages like Haskell \cite{jonesstg}. 
 
 Also perhaps unsurprisingly, call-by-need implementations tend to be more
 complicated than their strict counterparts. For example, even attempts at simple
-call-by-need semantics such as the Three Instruction Machine require lambda
-lifting and shared indirections, both of which make formal reasoning more
-difficult. The recently developed $\mathcal{CE}$ machine avoids these
-complications by using shared environments to share evaluation results between
-instances of a variable. Stelle et. al. showed that in addition to being simpler
-to implement and reason about, performance of this approach can often compete
-with the state of the art \cite{cem}. 
+call-by-need abstract machines such as the Three Instruction Machine \cite{TIM}
+require lambda lifting and shared indirections, both of which make formal
+reasoning more difficult. Our $\mathcal{CE}$ machine avoids these complications
+by using shared environments to share evaluation results between instances of a
+variable. We showed that in addition to being simpler to implement and reason
+about, performance of this approach can often compete with the state of the art
+\cite{cem}. 
 
 With recent improvements in higher order logics, machine verification of
 algorithms has become a valuable tool in software development. Instead of
@@ -50,7 +49,7 @@ existing work has focused on compiling strict languages
 the simple $\mathcal{CE}$ machine as a base for a verified compiler of a lazy
 language, using the Coq proof assistant. 
 
-As with many areas of research, the devil is in the details. What exactly
+As with many areas of research, the devil is in the details. What exactly do
 existing approaches mean when they claim their compilers are verified?
 Essentially, a verified compiler of a functional language is one that preserves
 computation of values. That is, we have a one directional implication that
@@ -58,7 +57,7 @@ computation of values. That is, we have a one directional implication that
 an equivalent value} \cite{chlipala2007certified}. The important thing to note is that the
 implication is only in one direction. If the source semantics never terminates,
 this class of correctness theorem says nothing about the behavior of the
-compiled code. This has consequences for turing complete source languages. If we
+compiled code. This has consequences for Turing-complete source languages. If we
 are unsure if a source program terminates, and wish to run it to check
 experimentally if it does, if we run the compiled code and it returns a value,
 we cannot be certain that it corresponds to a value computed in the source
@@ -74,11 +73,11 @@ One approach for getting around this issue is to try and capture the divergent
 behavior by defining a diverging semantics explicitly \cite{functionalbigstep}.
 Then we can safely say that \emph{if the source semantics diverges according to
 our diverging semantics, then the compiled code also diverges}. Unfortunately,
-this doesn't quite give us what we want, as we still can't be sure that a value
+this does not quite give us what we want, as we still cannot be sure that a value
 computed by the compiled code corresponds to a value computed by the source
-semantics. Essentially, the issue is that we don't have, and can't hope to have
-for a turing complete language, a constructive proof that for every program it
-evaluates to a value or diverges.  
+semantics. Essentially, the issue is that we do not have, and can't hope to have
+a Turing-complete language, a constructive proof that every program evaluates to
+a value or diverges.  
 
 For this paper, we choose to take the approach of \cite{chlipala2007certified}
 and define verification as the first implication above, focusing on the case in
