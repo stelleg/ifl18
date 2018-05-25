@@ -8,7 +8,7 @@ that our implementation preserves the big-step semantics, we prove preservation
 of any inductive reasoning on the structure of evaluation tree.  
 
 As discussed in Section~\ref{sec:introduction}, our source syntax is lambda calculus with
-deBruijn indices. DeBruijn indices count the number of intermediate lambdas
+de Bruijn indices. DeBruijn indices count the number of intermediate lambdas
 between them and their binding lambda.  
 \begin{align*}
  t &::= t \; t \; | \; x \; | \;  \lambda \; t \\
@@ -18,7 +18,7 @@ between them and their binding lambda.
 Throughout the rest of this paper, we will use Coq code directly to formalize
 some of the definition and theorems in the paper. This has the advantage of
 avoiding ambiguities and correctness issues involved in translating to \LaTeX.
-For example, the Coq code defining lambda calculus with deBruijn indices is: 
+For example, the Coq code defining lambda calculus with de Bruijn indices is: 
 
 \begin{lstlisting}
 Inductive tm : Type := 
@@ -115,7 +115,7 @@ extend the empty environment. It is also worth noting that while the closures in
 the heap cells are mutable, the shared environment structure is never mutated.
 This property is crucial when reasoning about variable dereferences. 
 
-The fact that our natural semantics is defined on lambda calculus with deBruijn
+The fact that our natural semantics is defined on lambda calculus with de Bruijn
 tindices differs from most existing definitions of call-by-need, such as
 Ariola's call-by-need \cite{ariola1995call} or Launchbury's lazy semantics
 \cite{launchburynatural}. These semantics are defined on lambda calculus with named
@@ -127,7 +127,7 @@ operating on lambda calculus with named variables would likely be relating
 Curien's calculus of closures to call-by-name semantics implemented with
 substitution. We return to this discussion in Section~\ref{sec:discussion}.
 
-As mentioned in Section~\ref{sec:introduction}, these big step semantics do not
+As mentioned in Section~\ref{sec:introduction}, these big-step semantics do not
 explicitly include a notion of nontermination. Instead, nontermination would be
 implied by the negation of the existence of an evaluation relation. This
 prevents reasoning directly about nontermination in an inductive way, but for
@@ -147,7 +147,7 @@ failed environment lookup.
 
 \subsection{Call-By-Name}
 
-In this section we define a call-by-name variant of our big step semantics and
+In this section we define a call-by-name variant of our big-step semantics and
 prove that it is an implementation of Curien's call-by-name calculus of
 closures \cite{curien1991abstract}. 
 

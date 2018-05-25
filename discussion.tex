@@ -50,14 +50,14 @@ valuable future work, and hope that the reader agrees that nothing in the design
 of our high level instruction machine would prevent such work.
 
 As a dual to the issue of a high level instruction machine language, some
-readers may take issue with calling lambda calculus with deBruijn indices a
+readers may take issue with calling lambda calculus with de Bruijn indices a
 "source language". Indeed, we do not advocate writing programs in such a
 language. Still, the conversion between lambda calculus with named variables and
-lambda calculus with deBruijn indices is a well understood topic, it is not
+lambda calculus with de Bruijn indices is a well understood topic, it is not
 particularly interesting in the context of a verified compiler.  Indeed, as
 noted below, semantics using named variables and substitution can be
 hard to get right \cite{breitnerthesis, nakata2009small}, so we stand by our
-decision to relate to a semantics based on lambda calculus with deBruijn
+decision to relate to a semantics based on lambda calculus with de Bruijn
 indices, namely Curien's calculus of closures. One potential approach for future
 work would be to prove that a call-by-name semantics using substition is
 equivalent to Curien's calculus of closures, which when combined with a proof
