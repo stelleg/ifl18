@@ -71,12 +71,7 @@ constructing such a proof monumentally tricky.
 One approach for getting around this issue is to try and capture the divergent
 behavior by defining a diverging semantics explicitly \cite{functionalbigstep}.
 Then we can safely say that \emph{if the source semantics diverges according to
-our diverging semantics, then the compiled code also diverges}. Unfortunately,
-this does not quite give us what we want, as we still cannot be sure that a value
-computed by the compiled code corresponds to a value computed by the source
-semantics. Essentially, the issue is that we do not have, and can't hope to have
-for a Turing-complete language, a constructive proof that every program
-evaluates to a value or diverges.  
+our diverging semantics, then the compiled code also diverges}. 
 
 For this paper, we choose to take the approach of \cite{chlipala2007certified}
 and define verification as the first implication above, focusing on the case in
