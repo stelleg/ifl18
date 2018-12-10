@@ -31,37 +31,37 @@ the next basic block, for real machine code this jump can be omitted.
 
 \begin{figure}
 \begin{align*}
-var \; 0 &:= \\ 
+var \; 0 := 
   &push \; ep : \\
   &push \; 0 : \\
-  &mov \; ep\%0 \; r1 : \\
-  &mov \; ep\%1 \; ep : \\
+  &mov \; \left(ep\%0\right) \; r1 : \\
+  &mov \; \left(ep\%1\right) \; ep : \\
   &jump \; r1 \\
-var \; \left(i+1\right) &:= \\
+var \; \left(i+1\right) :=
   &mov \; \left(ep\%2\right) \; ep : \\
   &var \; i \\
-compile \; i \; k &:= \left[var \; i\right] \\
-compile \; \left( m \; n \right) \; k &:=  \\
-  &let \; ms = compile \; m \; \left(1+k\right) \; in \\
+compile \; i \; k :=& \left[var \; i\right] \\
+compile \; \left( m \; n \right) \; k :=
+  &let \; ms = compile \; m \; \left(k+1\right) \; in \\
   &let \; nk = 1+k+length \; ms \; in \\
   &push \; ep :  \\
   &push \; nk : \\
-  &jump \; k+1 :: \\
-  &ms ++ compile \; n \; nk \\
-compile \; \lambda b \; k &:=  \\
+  &jump \; \left(k+1\right) :: \\
+  &ms \concat compile \; n \; nk \\
+compile \; \left(\lambda b\right) \; k :=
   &pop \; r1 : \\
-  &jump \; \left( r1, k+1 \right) \; k+2 :: \\
+  &jump \; \left(r1, k+1 \right) \; \left(k+2\right) :: \\
   &pop \; r1 : \\
   &mov \; k \; r1\%0 : \\
   &mov \; ep \; r1\%1 : \\
   &jump \; k :: \\
   &new \; 3 \; r2 : \\
-  &mov \; r1 \; r2\%0 : \\
-  &pop \; r2\%1 : \\
-  &mov \; ep \; r2\%2 : \\
+  &mov \; r1 \; \left(r2\%0\right) : \\
+  &pop \; \left(r2\%1\right) : \\
+  &mov \; ep \; \left(r2\%2\right) : \\
   &mov \; r2 \; ep : \\
-  &jump \; k+3 :: \\
-  &compile \; b \; k+3
+  &jump \; \left(k+3\right) :: \\
+  &compile \; b \; \left(k+3\right)
 \end{align*}
 \caption{Compiler Definition}
 \label{fig:compiler}

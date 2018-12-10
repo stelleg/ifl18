@@ -20,13 +20,20 @@ represent the program as a list of basic blocks, with pointers indexing into the
 list. This has the advantage of letting us easily reason about sublists and
 their relation to terms. As with other design decisions, this also should be
 fairly unproblematic for formalization to a more realistic hardware design. The
-full syntax of the machine is given in Figure~\ref{fig:im_syntax}.  
+full syntax of the machine is given in Figure~\ref{fig:im_syntax}. Note that
+curly brackets $\left\{\right\}$ denote optionality, while stars $*$ denote zero
+or more elements, represented as a list. Note that we'll use some common list
+terminology, such as bracket notation for indexing, i.e. $l\left[i\right]$ accesses the
+$i$'th element in $l$ (we don't worry about the partiality in this presentation
+of this operation, see the Coq implementation for a full treatment). We also use
+$\concat$ for list concatenation, and $::$ for consing an element onto the head
+of a list. 
 
 \begin{figure}
 \begin{align}
 n, l, w &\in \mathbb{N} \tag{Machine Word} \\
 r &:= ip \; | \; ep \; | \; r1 \; | \; r2 \tag{Registers} \\
-wo &:= r \; | r \; n \tag{Write Operands} \\
+wo &:= r \; | \; r \% n \tag{Write Operands} \\
 ro &:= wo \; | \; n \tag{Read Operands} \\
 i &:= push \; ro \; | \; pop \; wo \; | \; new \; n \; wo \; | \; mov \; ro \; wo \tag{Instructions} \\
 bb &:= i : bb \; | \; jump \left\{ro, l\right\} ro \tag{Basic Block} \\
@@ -91,7 +98,7 @@ bb, S' \rightarrow_{bb} S \\
 }{pop \; wo:bb, \langle rf, p, w::s, h \rangle \rightarrow_{bb} S}  \\ \\
 \tag{New} \inference{
 \forall i < n, f+i \notin \textsf{dom}\left(h\right) \\
-write \; wo \; f \langle rf, p, s, zeroes \; n \; f ++ h \rangle S' \\
+write \; wo \; f \langle rf, p, s, zeroes \; n \; f \concat h \rangle S' \\
 bb, S' \rightarrow_{bb} S
 }{new \; n \; wo:bb, \langle rf, p, s, h \rangle \rightarrow_{bb} S} \\ \\
 \tag{Mov} \inference{
@@ -100,7 +107,7 @@ write \; wo \; v \; S \; S' \quad
 bb, S' \rightarrow_{bb} S''
 }{mov \; ro \; wo:bb, S \rightarrow_{bb} S''} \\ \\
 \tag{Jump 0} \inference{
-read \; ro \; s \; 0 \quad
+read \; ro \; S \; 0 \quad
 write \; ip \; k \; S \; S'
 }{jump \; \left(ro, k\right) \; j, S \rightarrow_{bb} S'} \\ \\
 \tag{Jump S} \inference{

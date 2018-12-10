@@ -26,7 +26,12 @@
 of Functional Languages}{September 2018}{Lowell, MA, USA}
 \acmYear{2019}
 \copyrightyear{2019}
-
+\def\drawplusplus#1#2#3{\hbox to 0pt{\hbox to #1{\hfill\vrule height #3 depth
+      0pt width #2\hfill\vrule height #3 depth 0pt width #2\hfill
+      }}\vbox to #3{\vfill\hrule height #2 depth 0pt width
+      #1 \vfill}}
+      %Poor man's typography
+\def\concat{\mathrel{\drawplusplus {8pt}{0.4pt}{5pt}}}
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{corollary}{Corollary}[theorem]
 \newtheorem{lemma}{Lemma}[theorem]
@@ -53,7 +58,7 @@ difficulties in verifying call-by-need, and show how we overcome them.
 \author{George Stelle}
 \affiliation{
 %  \position{Scientist}
-  \department{CCS-7}              %% \department is recommended
+%  \department{CCS-7}              %% \department is recommended
   \institution{Los Alamos National Laboratory}            %% \institution is required
   \streetaddress{Bikini Atoll Rd., SM 30}
   \city{Los Alamos}
@@ -63,7 +68,7 @@ difficulties in verifying call-by-need, and show how we overcome them.
 }
 \affiliation{
 %  \position{Graduate Student}
-  \department{Computer Science}              %% \department is recommended
+%  \department{Computer Science}              %% \department is recommended
   \institution{University of New Mexico}            %% \institution is required
   \streetaddress{1 University of New Mexico}
   \city{Albuquerque}
