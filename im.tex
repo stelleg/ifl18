@@ -10,137 +10,115 @@ straightforward exercise to represent the stack in main memory. With the fixed
 machine word size, we would need to make push operations partial to represent
 stacks this way. We define our machine to have only four registers: an
 instruction pointer, an environment pointer, and two scratch registers. Our
-instruction set is minimal, consisting only of a conditional \texttt{jump}
-instruction, \texttt{pop} and \texttt{push} instructions, a \texttt{mov}
-instruction, and a \texttt{new} instruction for allocating new memory. Note that
-for our program memory, we have pointers to basic blocks, but for simplicity of
-proofs we choose to not increment the instruction pointer within a basic block.
-Instead, the instruction pointer is constant within a basic block, only changing
-between basic blocks. In fact, we represent the program as a list of basic
-blocks, with pointers indexing into the list. This has the advantage of letting
-us easily reason about sublists and their relation to terms. As with other
-design decisions, this also should be fairly unproblematic for formalization to
-a more realistic hardware design. The full syntax of the machine is given in
-Figure~\ref{fig:im_syntax}.  
+instruction set is minimal, consisting only of a conditional jump instruction,
+pop and push instructions, a mov instruction, and a new instruction for
+allocating new memory. Note that for our program memory, we have pointers to
+basic blocks, but for simplicity of proofs we choose to not increment the
+instruction pointer within a basic block.  Instead, the instruction pointer is
+constant within a basic block, only changing between basic blocks. In fact, we
+represent the program as a list of basic blocks, with pointers indexing into the
+list. This has the advantage of letting us easily reason about sublists and
+their relation to terms. As with other design decisions, this also should be
+fairly unproblematic for formalization to a more realistic hardware design. The
+full syntax of the machine is given in Figure~\ref{fig:im_syntax}.  
 
 \begin{figure}
-\begin{lstlisting}
-Inductive Reg := 
-  | IP
-  | EP
-  | R1
-  | R2.
-
-Inductive WO := 
-  | WR : Reg -> WO
-  | WM : Reg -> nat -> WO.
-
-Infix "%" := WM (at level 30).
-
-Inductive RO := 
-  | RW : WO -> RO
-  | RC : nat -> RO.
-
-Inductive Instr : Type :=
-  | push : RO -> Instr
-  | pop : WO -> Instr
-  | new : nat -> WO -> Instr 
-  | mov : RO -> WO -> Instr.
-
-Inductive BasicBlock : Type :=
-  | instr : Instr -> BasicBlock -> BasicBlock
-  | jump : option (RO*Ptr) -> RO -> BasicBlock.
-
-Definition Program := list BasicBlock.
-\end{lstlisting}
+\begin{align}
+n, l, w &\in \mathbb{N} \tag{Machine Word} \\
+r &:= ip \; | \; ep \; | \; r1 \; | \; r2 \tag{Registers} \\
+wo &:= r \; | r \; n \tag{Write Operands} \\
+ro &:= wo \; | \; n \tag{Read Operands} \\
+i &:= push \; ro \; | \; pop \; wo \; | \; new \; n \; wo \; | \; mov \; ro \; wo \tag{Instructions} \\
+bb &:= i : bb \; | \; jump \left\{ro, l\right\} ro \tag{Basic Block} \\
+p &:= bb* \tag{Program} \\
+s &:= w* \tag{Stack} \\
+h &:= \left(l, w\right)* \tag{Heap}\\
+S &:= \langle rf, p, s, h \rangle \tag{State} 
+\end{align}
 \caption{Instruction Machine Syntax}
 \label{fig:im_syntax}
 \end{figure}
 
-We separate read (\texttt{RO}) and write (\texttt{WO}) operands. Write
-operands can be registers (\texttt{WR}) or memory (\texttt{WM}). Read operands
-can be any write operand (\texttt{RW}) or a constant (\texttt{RC}). For reading,
-we have a \texttt{read} relation, which takes a read operand and a state and is
-inhabited when the third argument can be read from that read operand in that
-state. Similarly, a \texttt{write} relation is inhabited when writing the second
-argument into the first in a state defined by the third argument results in the
-state defined by the fourth argument.  
+We separate read (ro) and write (wo) operands. Write operands can be registers
+or memory (defined by a register and a constant offset). Read operands can be
+any write operand or a constant. For reading, we have a read relation, which
+takes a read operand and a state and is inhabited when the third argument can be
+read from that read operand in that state. Similarly, a write relation is
+inhabited when writing the second argument into the first in a state defined by
+the third argument results in the state defined by the fourth argument.  
 
-The machine semantics should be fairly unsurprising. A \texttt{State},
-constructed by \texttt{st}, consists of a register file, program memory, a
-stack, and a heap. The \texttt{push} instruction takes a read operand and pushes
-it onto the stack. The \texttt{pop} instruction pops the top of the stack into a
-write operand. The \texttt{mov} instruction moves a machine word from a read
-operand to a write operand. The \texttt{jump} instruction is parameterized by an
-optional pair, which, if present, reads the first element of the pair from a read
-operand, checks if it is zero, and if so sets the IP to the second element of
-the pair, which is a constant pointer. If the condition is not zero, then it
+The machine semantics should be fairly unsurprising. A State, consists of a
+register file, program memory, a stack, and a heap. The push instruction takes a
+read operand and pushes it onto the stack. The pop instruction pops the
+top of the stack into a write operand. The mov instruction moves a machine word
+from a read operand to a write operand. The jump instruction is parameterized by
+an optional pair, which, if present, reads the first element of the pair from a
+read operand, checks if it is zero, and if so sets the IP to the second element
+of the pair, which is a constant pointer. If the condition is not zero, then it
 sets the IP to the instruction pointer contained in the second jump argument. If
 we pass nothing as the first argument, then it becomes an unconditional set of
 the IP to the value read from the second argument.  Note that the second
 argument is a read operand, so it can either be a constant or read from a register
 or memory. This means it can be effectively either a direct or indirect jump,
-both of which are used in the compilation of lambda terms. The \texttt{new}
-instruction allocates a contiguous block of new memory and writes the resulting
-pointer to the fresh memory into a write operand. We take the approach of not
-choosing a particular allocation strategy. Instead, we follow existing
-approaches and parameterize our proof on the existence of such functionality
+both of which are used in the compilation of lambda terms. The new instruction
+allocates a contiguous block of new memory and writes the resulting pointer to
+the fresh memory into a write operand. We take the approach of not choosing a
+particular allocation strategy. Instead, we follow existing approaches and
+parameterize our proof on the existence of such functionality
 \cite{chlipala2007certified}. For simplicity, we assume that the allocation
 function returns completely fresh memory, though it should be possible to modify
 this assumption to be less restrictive, i.e., let it re-use heap locations that
 are no longer live. The complete semantics of the machine is given in
 Figure~\ref{fig:im_semantics}.  Note that we separate instruction steps and
 basic block steps. Recall that a basic block is a sequence of instructions that
-ends with a jump. The \texttt{step\_bb} relation will execute the instructions
+ends with a jump. The Step BB relation will execute the instructions
 in the basic block in order, then set the IP in accordance with the
-\texttt{jump} semantics. The \texttt{step} relation dereferences a basic block
-at the current IP, and if executing the basic block results in a new state, then
-the machine executes to that state. 
+jump semantics. The Step relation dereferences a basic block at the current IP,
+and if executing the basic block results in a new state, then the machine
+executes to that state. 
 
 \begin{figure}
-\begin{lstlisting}
-Inductive step_bb : BasicBlock -> State -> State -> Type :=
-  | step_push : forall rf p s h ro bb v sn,
-  read ro (st rf p s h) v ->
-  step_bb bb (st rf p (v::s) h) sn ->
-  step_bb (instr (push ro) bb) (st rf p s h) sn
-  | step_pop : forall rf p s h wo bb w s' sn,
-  write wo w (st rf p s h) s' ->
-  step_bb bb s' sn ->
-  step_bb (instr (pop wo) bb) (st rf p (w::s) h) sn
-  | step_new : forall rf p s h wo bb w s' n sn,
-  (forall i, i < n -> not (In (i+w) (domain h))) ->
-  w > 0 ->
-  write wo w (st rf p s (zeroes n w ++ h)) s' ->
-  step_bb bb s' sn ->
-  step_bb (instr (new n wo) bb) (st rf p s h) sn
-  | step_mov : forall s bb ro wo s' v sn,
-  read ro s v -> write wo v s s' ->
-  step_bb bb s' sn ->
-  step_bb (instr (mov ro wo) bb) s sn
-  | step_jump0 : forall ro k j s s',
-  read ro s 0 ->
-  write (WR IP) k s s' ->
-  step_bb (jump (Some (ro, k)) j) s s'
-  | step_jumpS : forall ro k j s s' l k',
-  l > 0 ->
-  read ro s l ->
-  read j s k ->
-  write (WR IP) k s s' ->
-  step_bb (jump (Some (ro, k')) j) s s'
-  | step_jump : forall ro s s' l,
-  read ro s l ->
-  write (WR IP) l s s' ->
-  step_bb (jump None ro) s s'
-.
-
-Inductive step : transition State :=
-  | enter : forall rf p s h k bb sn,
-    read IP (st rf p s h) k ->
-    nth_error p k = Some bb ->
-    step_bb bb (st rf p s h) sn ->
-    step (st rf p s h) sn.
-\end{lstlisting}
+\begin{gather*}
+\tag{Push}
+\inference{
+read \; ro \; \langle rf, p s, h \rangle \; v \\
+bb, \langle rf, p, v::s, h \rangle \rightarrow_{bb} S 
+}{push \; ro : bb, \langle rf, p, s, h \rangle \rightarrow_{bb} S} \\ \\
+\tag{Pop}
+\inference{
+write \; wo \; w \langle rf, p, s, h \rangle S' \\
+bb, S' \rightarrow_{bb} S \\
+}{pop \; wo:bb, \langle rf, p, w::s, h \rangle \rightarrow_{bb} S}  \\ \\
+\tag{New} \inference{
+\forall i < n, f+i \notin \textsf{dom}\left(h\right) \\
+write \; wo \; f \langle rf, p, s, zeroes \; n \; f ++ h \rangle S' \\
+bb, S' \rightarrow_{bb} S
+}{new \; n \; wo:bb, \langle rf, p, s, h \rangle \rightarrow_{bb} S} \\ \\
+\tag{Mov} \inference{
+read \; ro \; s \; v \quad
+write \; wo \; v \; S \; S' \quad
+bb, S' \rightarrow_{bb} S''
+}{mov \; ro \; wo:bb, S \rightarrow_{bb} S''} \\ \\
+\tag{Jump 0} \inference{
+read \; ro \; s \; 0 \quad
+write \; ip \; k \; S \; S'
+}{jump \; \left(ro, k\right) \; j, S \rightarrow_{bb} S'} \\ \\
+\tag{Jump S} \inference{
+l > 0 \quad 
+read \; ro \; S \; l \\
+read \; j \; S \; k \quad
+write \; ip \; k \; S \; S'
+}{jump \; \left(ro, k'\right) \; j, S \rightarrow_{bb} S'} \\ \\
+\tag{Jump} \inference{
+read \; ro \; S \; l \quad
+write \; ip \; l \; S \; S'
+}{jump \; ro:S \rightarrow_{bb} S'} \\ \\
+\tag{Enter} \inference{
+read \; ip \; \langle rf, p, s, h \rangle \; k \\
+p\left[k\right] = bb \\
+bb, \langle rf, p, s, h \rangle \rightarrow_{bb} S' 
+}{\langle rf, p, s, h \rangle \rightarrow S'}
+\end{gather*}
 \caption{Instruction Machine Semantics}
 \label{fig:im_semantics}
 \end{figure}

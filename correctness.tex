@@ -57,62 +57,11 @@ their respective counterparts in the small-step semantics).
 
 In summary, we require that the current closure in the small-step semantics is
 equivalent to the closure represented by the instruction pointer, environment
-pointer pair, and that the stacks and the heaps are equivalent. See
-Figure~\ref{fig:state_rel} for some of the formal definitions of these
-relations. 
+pointer pair, and that the stacks and the heaps are equivalent. The actual Coq
+implementation of this relation is too involved to relate directly here. We
+encourage the reader to read the linked Coq source to fully appreciate it.
 
-\begin{figure}
-\begin{lstlisting}
-Inductive heap_rel : cesm.heap -> im.Heap -> Type := 
-  | heap_nil : heap_rel [] [] 
-  | heap_cons : $\forall$ l l' ne ch ih ip ep ine e t, 
-    l $\notin$ domain ch -> 
-    l' $\notin$ domain ih -> S l' $\notin$ domain ih -> S (S l') $\notin$ domain ih ->
-    l > 0 -> l' > 0 -> 
-    heap_rel ch ih -> 
-    heap_rel 
-      ((l, cl (close t e) ne)::ch) 
-      ((l', ip)::(S l', ep)::(S (S l'), ine)::ih).
-
-Definition prog_eq (p : Ptr) (pr : Program) (t : tm) := 
-  let subpr := compile t p in 
-  subpr = firstn (length subpr) (skipn p pr).
-
-Inductive env_eq (ch : cesm.heap) (ih : im.Heap) (r : heap_rel ch ih)
-  : nat -> Ptr -> Type :=
-  | e0 : env_eq ch ih r 0 0 
-  | eS : $\forall$ l e ne t il ip ep nep, 
-    in_heap_rel ch ih r l e ne t il ip ep nep ->
-    env_eq ch ih r l il.
-
-Inductive clos_eq (ch : cem.heap) 
-                  (ih : im.Heap) 
-                  (r : heap_rel ch ih) 
-                  (p : Program):
-                  closure -> Ptr -> Ptr -> Type :=
-  | c_eq : $\forall$ t e ip ep, 
-           prog_eq ip p t -> 
-           env_eq ch ih r e ep ->
-           clos_eq ch ih r p (close t e) ip ep. 
-
-Inductive state_rel (cs : cesm.state) (is : im.State) : Type := 
-  | str : $\forall$ r, 
-  heap_eq (st_hp cs) (st_h is) r 
-          (st_p is) ->
-  clos_eq (st_hp cs) (st_h is) r 
-          (st_p is) (st_cl cs) 
-          (rff (st_rf is) IP) 
-          (rff (st_rf is) EP) ->
-  stack_eq (st_hp cs) (st_h is) r 
-           (st_p is) (st_st cs) (st_s is) ->
-  state_rel cs is.
-\end{lstlisting}
-\caption{Select Relation Definitions Between Small Step $\mathcal{CE}$ and the
-Instruction Machine}
-\label{fig:state_rel}
-\end{figure}
-
-Now that we have our relation between heaps, we can state our primary lemma.
+Given this relation between heaps, we can state our primary lemma.
 \begin{lemma} \label{lem:cesm_im}
 Given that an instruction machine state $i$ is related to a small-step
 semantics state $s$, and that small-step semantics state steps to a new state
@@ -155,8 +104,6 @@ heap, we proceed by induction on the heap relation. In addition, we must prove
 a supporting lemma that all environment relations are preserved by the update.
 \end{proofoutline}
 
-To paraphrase Pascal: given more time, I would have written a shorter proof.
-
 We now have a proof that the small-step semantics implements the big-step
 semantics, and a proof that the instruction machine implements the small-step
 semantics. We can now combine these to get our correct compiler theorem. 
@@ -180,19 +127,6 @@ will evaluate to a state $v'$ which is related to $v$. We use these two facts,
 along with the proof that the small-step implements the big-step for any stack,
 specialized on the empty stack, to prove our theorem. 
 \end{proofoutline}
-
-See Figure~\ref{fig:correctness_theorem} for a formal statement of
-Theorem~\ref{thm:correctness}. 
-
-\begin{figure}
-\begin{lstlisting}
-Theorem compile_correct (t : db.tm) v : cem.step (cem.I t) v → 
-  sigT (λ v', refl_trans_clos im.step (im.I (compile t)) v' *
-      state_rel (cesm.st (cem.conf_h v) nil (cem.conf_c v)) v').
-\end{lstlisting}
-\caption{Formal Definition of Theorem~\ref{thm:correctness}}
-\label{fig:correctness_theorem}
-\end{figure}
 
 It is worth recalling exactly what the relation implies about the two value
 states. Namely, in addition to the value closures being equivalent, their heaps

@@ -10,22 +10,11 @@ of any inductive reasoning on the structure of evaluation tree.
 As discussed in Section~\ref{sec:introduction}, our source syntax is lambda calculus with
 de Bruijn indices. De Bruijn indices count the number of intermediate lambdas
 between them and their binding lambda.  
+
 \begin{align*}
  t &::= t \; t \; | \; x \; | \;  \lambda \; t \\
  x &\in \mathbb{N}
 \end{align*}
-
-Throughout the rest of this paper, we will use Coq code directly to formalize
-some of the definition and theorems in the paper. This has the advantage of
-avoiding ambiguities and correctness issues involved in translating to \LaTeX.
-For example, the Coq code defining lambda calculus with de Bruijn indices is: 
-
-\begin{lstlisting}
-Inductive tm : Type := 
-  | var : nat -> tm 
-  | lam : tm -> tm
-  | app : tm -> tm -> tm.
-\end{lstlisting}
 
 The essence of the $\mathcal{CE}$ semantics is that we implement a shared
 environment, and use its structure to share results of computations. This allows
@@ -46,7 +35,7 @@ a thunk or closure not evaluated to WHNF) will be replaced with said value. The
 binding of a new variable extends the shared environment structure with a new
 cell. This occurs during application, which evaluates the left hand side to an
 abstraction, then extend the environment with the argument term closed under the
-environment pointer of the application. The \texttt{app} ensures that two
+environment pointer of the application. The App rule ensures that two
 variables bound to the same argument closure will point to the same location in
 the shared environment. Because they point to the same location by construction
 of the shared environment, we can update that location with the value computed
@@ -54,55 +43,53 @@ at the first variable dereference, and then each subsequent dereference will
 point to this value. The variable rule applies the update by indexing into the
 shared environment structure and replacing the closure at that location with the
 resulting value. The big-step semantics is described in the standard way by
-logical relation in Figure~\ref{fig:bigstep}. A few notes about definitions used
-in the semantics: the \texttt{update $\Psi$ x v} function replaces the closure
-at location \texttt{x} in heap $\Psi$ with value \texttt{v}.  It is worth noting
-that while the closures in the heap cells are mutable, the shared environment
-structure is never mutated.  This property is crucial when reasoning about
-variable dereferences.  The curly brackets (or the \texttt{cl} constructor,
-depending on context) construct a heap cell containing a closure and a
-environment continuation. The \texttt{app} constructor represents an
-application, while the \texttt{var} constructor is a variable constructor and
-\texttt{lam} is the constructor for an abstraction. The \texttt{clu} function
-looks up a variable index in the shared environment structure by following
-environment continuation pointers. The $\langle \Phi \rangle \texttt{c}$
-notation constructs a configuration from a heap $\Phi$ and a closure \texttt{c}.
-Note that we require that fresh heap locations are greater than zero. This is
-required for reasoning about compilation to the instruction machine, which we
-will return to in Section~\ref{sec:im_semantics}. The \texttt{isfresh} relation
-is defined as $f \notin dom \big( \Psi \big)$. Of course, for a real
-implementation, this is far too strong a constraint, as it doesn't allow any
-sort of heap re-use. We return to this issue in Section~\ref{sec:discussion},
-and discuss how this could be relaxed to either allow reasoning about garbage
-collection or direct heap-reuse.
+logical relation in Figure~\ref{fig:bigstep}. It is worth noting that while the
+closures in the heap cells are mutable, the shared environment structure is
+never mutated. This property is crucial when reasoning about variable
+dereferences. The $\mu\left(l, i\right)$ function looks up a variable index in
+the shared environment structure by following environment continuation pointers,
+returning the location and cell pointed to by the final step. Note that we
+require that fresh heap locations are greater than zero. This is required for
+reasoning about compilation to the instruction machine, which we will return to
+in Section~\ref{sec:im_semantics}. While we constrain fresh heap locations to
+not exists in the domain of the heap, for a real implementation, this is far too
+strong a constraint, as it doesn't allow any sort of heap re-use. We return to
+this issue in Section~\ref{sec:discussion}, and discuss how this could be
+relaxed to either allow reasoning about garbage collection or direct heap-reuse.
 
 \begin{figure}
-\begin{lstlisting}
-Fixpoint clu (v env:nat) (h:heap) : option (nat * cell) := 
-  match lookup env h with
-  | None => None
-  | Some (cl c a) => match v with
-    | S n => clu n a h
-    | 0 => Some (env, cl c a)
-    end
-  end.
-
-Inductive step : conf -> conf -> Type :=
-  | Id : $\forall$ M x y z $\Phi$ $\Psi$ v e, 
-              clu y e $\Phi$ = Some (x, {M, z}) -> 
-                    $\langle$$\Phi$$\rangle$M $\Downarrow$ $\langle$$\Psi$$\rangle$v ->
-      $\langle$$\Phi$$\rangle$close (var y) e $\Downarrow$ $\langle$update $\Psi$ x v$\rangle$v
-  | Abs : $\forall$ N $\Phi$ e, 
-          $\langle$$\Phi$$\rangle$close (lam N) e $\Downarrow$ $\langle$$\Phi$$\rangle$close (lam N) e
-  | App : $\forall$ N M B B' $\Phi$ $\Psi$ $\Upsilon$ f e ne ae, 
-                      isfresh (domain $\Psi$) f -> 
-                            f > 0 ->
-          $\langle$$\Phi$$\rangle$close M e $\Downarrow$ $\langle$$\Psi$$\rangle$close (lam B) ne -> 
-      $\langle$$\Psi$, f ↦ {close N e, ne}$\rangle$close B f $\Downarrow$ $\langle$$\Upsilon$$\rangle$close (lam B') ae   ->
-              $\langle$$\Phi$$\rangle$close (app M N) e $\Downarrow$ $\langle$$\Upsilon$$\rangle$close (lam B') ae
-where " c1 '$\Downarrow$' c2 " := (step c1 c2).
-\end{lstlisting}
-\caption{Big Step $\mathcal{CE}$ Semantics}
+\textbf{Syntax}
+\begin{align*}
+\tag{Term} t &::= i \; | \; \lambda t \; | \; t \; t  \\
+\tag{Variable} i &\in \mathbb{N}  \\
+\tag{Closure} c &::= t \left[l\right] \\
+\tag{Value} v &::= \lambda t \left[l\right] \\
+\tag{Heap} \mu &::= \epsilon \; | \; \mu \left[ l \mapsto \rho \right] \\
+\tag{Environment} \rho &::= \bullet \; | \; c \cdot l \\
+\tag{Location} l,f &\in \mathbb{N}  \\
+\tag{State} s &::= \left(c, \mu \right)
+\end{align*}
+\textbf{Semantics}
+\begin{align*}
+\tag{Id} \inference
+{\mu \left( l, i \right) = l' \mapsto c \cdot l'' \quad 
+ \left(c, \mu\right) \Downarrow \left(v, \mu'\right)}
+{\left(i\left[l\right],\mu\right) \Downarrow \left(v, \mu'\left[l' \mapsto v \cdot l''\right]\right)}
+\end{align*}
+\begin{align*}
+\tag{App} \inference
+{\left(t\left[l\right], \mu\right) \Downarrow \left(\lambda t_2\left[l'\right], \mu'\right) 
+   \quad f \not \in \textnormal{dom}\left(\mu'\right)
+   \\ \left(t_2\left[f\right], \mu'\left[f \mapsto t_3\left[l\right] \cdot l'\right]\right)
+         \Downarrow 
+      \left(v, \mu'' \right) 
+   }
+{\left(t \; t_3\left[l\right], \mu\right) \Downarrow \left(v, \mu'' \right)}  
+\end{align*}
+\begin{align*}
+\tag{Abs} \inference {} {\left(\lambda t\left[l\right], \mu\right) \Downarrow \left(\lambda t\left[l\right], \mu\right)}
+\end{align*}
+\caption{Big Step $\mathcal{CE}$ Syntax and Semantics}
 \label{fig:bigstep}
 \end{figure}
 
@@ -132,10 +119,10 @@ do computation on in standard ways. For example, we could potentially compute
 properties such as size and depth, which would be related to operational properties
 of compiled code. We hope in future work to explore this approach further.
 
-Finally, given a term $t$, we define the initial configuration as $\langle [] \rangle
-\texttt{close t 0}$. As discussed, the choice of the null pointer for the environment
-pointer is not arbitrary, but chosen across our semantics uniformly to represent
-failed environment lookup. 
+Finally, given a term $t$, we define the initial configuration as
+$\left(t\left[0\right], \epsilon\right)$. As discussed, the choice of the null
+pointer for the environment pointer is not completely arbitrary, but chosen
+across our semantics uniformly to represent failed environment lookup. 
 
 \subsection{Call-By-Name}
 
@@ -152,9 +139,9 @@ A well known existing call-by-name semantics is Curien's calculus of closures
 \cite{curien1991abstract}. Refer to Figure~\ref{fig:curien} for a formalization of this
 semantics. This semantics defines closures as a term, environment pair, where an
 environment is a list of closures. Abstractions are in weak head normal form,
-variables index into the environment using the \texttt{nth\_error} standard
-library function, and applications evaluate the left hand side to a value, then
-extend the environment of the value with the closure of the argument. 
+variables index into the environment, and applications evaluate the left hand
+side to a value, then extend the environment of the value with the closure of
+the argument. 
 
 We define a heterogeneous equivalence relation between our shared environment
 and Curien's environment. Effectively, this relation is the proposition that
@@ -176,53 +163,71 @@ call-by-name semantics steps to from $c'$ that is equivalent to $v$.
 The proof proceeds by induction on Curien's step relation. The abstraction rule
 is a trivial base case. The variable lookup rule uses a helper lemma that proves
 by induction on the variable that if the two environments are equivalent and the
-\texttt{nth\_error} function looks up a closure, then the \texttt{clu} function
-will look up an equivalent closure. The application rule uses a helper lemma
-proves that a fresh allocation will keep any equivalent environments equivalent,
-and that the new environment defined by the fresh allocation will be equivalent
-to the extended environment of Curien's semantics.
+variable indexes to a closure, then the $\mu$ function will look up an
+equivalent closure. The application rule uses a helper lemma proves that a fresh
+allocation will keep any equivalent environments equivalent, and that the new
+environment defined by the fresh allocation will be equivalent to the extended
+environment of Curien's semantics.
 \end{proofoutline}
 
 \begin{figure}
-\begin{lstlisting}
-Inductive closure := | close : tm -> list closure -> closure. 
-Definition env := list closure.
-
-Inductive step : closure -> closure -> Type := 
-  | Abs : $\forall$ b e, 
-      step (close (lam b) e) (close (lam b) e)
-  | Var : $\forall$ x e v c, 
-      nth_error e x = Some c -> 
-      step c v -> 
-      step (close (var x) e) v
-  | App : $\forall$ m n b e v mve,
-      step (close m e) (close (lam b) mve) ->
-      step (close b (close n e::mve)) v ->
-      step (close (app m n) e) v.
-\end{lstlisting}
-\caption{Curien's Calculus of Closures}
+\textbf{Syntax}
+\begin{align*}
+\tag{Term} t &::= i \; | \; \lambda t \; | \; t \; t  \\
+\tag{Variable} i &\in \mathbb{N}  \\
+\tag{Closure} c &::= t \left[\rho\right] \\
+\tag{Value} v &::= \lambda t \left[\rho\right] \\
+\tag{Environment} \rho &::= \bullet \; | \; c \cdot \rho \\
+\end{align*}
+\textbf{Semantics}
+\begin{align*}
+\tag{LEval}\inference
+{t_1\left[\rho\right] {\Downarrow} \lambda t_2\left[\rho'\right] \\ 
+ t_2\left[t_3\left[\rho\right] \cdot \rho'\right] \Downarrow v}
+{t_1 t_3\left[\rho\right] \Downarrow v } 
+\end{align*}
+\begin{align*}
+\inference
+{c_i \Downarrow v}
+{\tag{LVar} i \left[c_0 \cdot c_1 \cdot ... c_i \cdot \rho\right] \Downarrow v}
+\end{align*}
+\caption{Curien's call-by-name calculus of closures}
 \label{fig:curien}
 \end{figure}
 
-
 \begin{figure}
-\begin{lstlisting}
-Inductive step : conf -> conf -> Type :=
-  | Id : $\forall$ M x y z $\Phi$ $\Psi$ v e, 
-          clu y e $\Phi$ = Some (x, {M, z}) -> 
-                    $\langle$$\Phi$$\rangle$M $\Downarrow$ $\langle$$\Psi$$\rangle$v ->
-            $\langle$$\Phi$$\rangle$close (var y) e $\Downarrow$ $\langle$$\Psi$$\rangle$v
-  | Abs : $\forall$ N $\Phi$ e, 
-        $\langle$$\Phi$$\rangle$close (lam N) e $\Downarrow$ $\langle$$\Phi$$\rangle$close (lam N) e
-  | App : $\forall$ N M B B' $\Phi$ $\Psi$ $\Upsilon$ f e ne ae, 
-              isfresh (domain $\Psi$) f -> 
-                            f > 0 ->
-          $\langle$$\Phi$$\rangle$close M e $\Downarrow$ $\langle$$\Psi$$\rangle$close (lam B) ne -> 
-      $\langle$$\Psi$, f ↦ {close N e, ne}$\rangle$close B f $\Downarrow$ $\langle$$\Upsilon$$\rangle$close (lam B') ae   ->
-              $\langle$$\Phi$$\rangle$close (app M N) e $\Downarrow$ $\langle$$\Upsilon$$\rangle$close (lam B') ae
-where " c1 '$\Downarrow$' c2 " := (step c1 c2).
-\end{lstlisting}
-\caption{Call-by-Name $\mathcal{CE}$ Semantics}
+\textbf{Syntax}
+\begin{align*}
+\tag{Term} t &::= i \; | \; \lambda t \; | \; t \; t  \\
+\tag{Variable} i &\in \mathbb{N}  \\
+\tag{Closure} c &::= t \left[l\right] \\
+\tag{Value} v &::= \lambda t \left[l\right] \\
+\tag{Heap} \mu &::= \epsilon \; | \; \mu \left[ l \mapsto \rho \right] \\
+\tag{Environment} \rho &::= \bullet \; | \; c \cdot l \\
+\tag{Location} l,f &\in \mathbb{N}  \\
+\tag{State} s &::= \left(c, \mu \right)
+\end{align*}
+\textbf{Semantics}
+\begin{align*}
+\tag{Id} \inference
+{\mu \left( l, i \right) = l' \mapsto c \cdot l'' \quad 
+ \left(c, \mu\right) \Downarrow \left(v, \mu'\right)}
+{\left(i\left[l\right],\mu\right) \Downarrow \left(v, \mu'\right)}
+\end{align*}
+\begin{align*}
+\tag{App} \inference
+{\left(t\left[l\right], \mu\right) \Downarrow \left(\lambda t_2\left[l'\right], \mu'\right) 
+   \quad f \not \in \textnormal{dom}\left(\mu'\right)
+   \\ \left(t_2\left[f\right], \mu'\left[f \mapsto t_3\left[l\right] \cdot l'\right]\right)
+         \Downarrow 
+      \left(v, \mu'' \right) 
+   }
+{\left(t \; t_3\left[l\right], \mu\right) \Downarrow \left(v, \mu'' \right)}  
+\end{align*}
+\begin{align*}
+\tag{Abs} \inference {} {\left(\lambda t\left[l\right], \mu\right) \Downarrow \left(\lambda t\left[l\right], \mu\right)}
+\end{align*}
+\caption{Big Step Call-by-Name $\mathcal{CE}$ Syntax and Semantics}
 \label{fig:bigstepname}
 \end{figure}
 

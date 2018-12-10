@@ -5,42 +5,56 @@ machine, and show that it implements the big-step semantics of
 Section~\ref{sec:cem_big}. This is a fairly straightforward transformation implemented
 by adding a stack. The source language is the same, and we simply add a stack to
 our configuration (and call it a state). The stack elements are either argument
-closures (\texttt{inl}) or update markers (\texttt{inr}). Update markers
-are pushed onto the stack when a variable dereferences that location in the
-heap. When they are popped by an abstraction, the closure at that location is
-replaced by said abstraction, so that later dereferences by the same variable in
-the same scope dereference the value, and do not repeat the computation.
-Argument closures are pushed onto the stack by applications, with the same
-environment pointer duplicated in the current closure and the argument closure.
-Argument closures are popped off the stack by abstractions, which allocate a
-fresh memory location, write the argument closure to it, write the environment
-continuation as the current environment pointer, then enter the body of the
-abstraction with the fresh environment pointer. This is the mechanism used for
-extending the shared environment structure. The semantics is defined formally in
-Figure~\ref{fig:cesm}. The \texttt{update} function replaces a closure in a heap
-cell with the specified closure.  
+closures or update markers. Update markers are pushed onto the stack when a
+variable dereferences that location in the heap. When they are popped by an
+abstraction, the closure at that location is replaced by said abstraction, so
+that later dereferences by the same variable in the same scope dereference the
+value, and do not repeat the computation.  Argument closures are pushed onto the
+stack by applications, with the same environment pointer duplicated in the
+current closure and the argument closure.  Argument closures are popped off the
+stack by abstractions, which allocate a fresh memory location, write the
+argument closure to it, write the environment continuation as the current
+environment pointer, then enter the body of the abstraction with the fresh
+environment pointer. This is the mechanism used for extending the shared
+environment structure. The semantics is defined formally in
+Figure~\ref{fig:cesm}.  
 
 \begin{figure}
-\begin{lstlisting}
-Inductive step : transition state :=
-  | Upd : $\forall$ $\Phi$ b e l s, 
-  st $\Phi$ (inr l::s) (close (lam b) e) ->_s 
-  st (update $\Phi$ l (close (lam b) e)) s (close (lam b) e)
-  | Var : $\forall$ $\Phi$ s v l c e e', 
-  clu v e $\Phi$ = Some (l,cl c e') -> 
-  st $\Phi$ s (close (var v) e) ->_s 
-  st $\Phi$ (inr l::s) c
-  | Abs : $\forall$ $\Phi$ b e f c s, 
-  isfresh (domain $\Phi$) f -> 
-  f > 0 -> 
-  st $\Phi$ (inl c::s) (close (lam b) e) ->_s 
-  st ((f, cl c e):: $\Phi$) s (close b f)
-  | App : $\forall$ $\Phi$ e s n m, 
-  st $\Phi$ s (close (app m n) e) ->_s 
-  st $\Phi$ (inl (close n e)::s) (close m e)
-where " c1 '->_s' c2 " := (step c1 c2).
-\end{lstlisting}
-\caption{Small Step $\mathcal{CE}$ Semantics}
+\textbf{Syntax}
+\begin{align*}
+\tag{State} s &::= \langle c, \sigma, \mu \rangle \\
+\tag{Term} t &::= i \; | \; \lambda t \; | \; t \; t  \\
+\tag{Variable} i &\in \mathbb{N}  \\
+\tag{Closure} c &::= t \left[l\right] \\
+\tag{Value} v &::= \lambda t\left[l\right] \\
+\tag{Heap} \mu &::= \epsilon \; | \; \mu \left[ l \mapsto \rho \right] \\
+\tag{Environment} \rho &::= \bullet \; | \; c \cdot l \\
+\tag{Stack} \sigma &::= \square \; | \; \sigma \; c \;  | \; \sigma \; u \\
+\tag{Location} l,u,f &\in \mathbb{N}
+\end{align*}
+\textbf{Semantics}
+\begin{align*}
+\tag{Upd}
+\langle v,  \sigma \; u , \mu \rangle 
+  &\rightarrow
+\langle v, \sigma, \mu\left(u \mapsto v \cdot l\right) \rangle  
+\; \textnormal{where} \; c \cdot l = \mu\left(u\right) \\
+\tag{Lam}
+\langle \lambda t\left[l\right], \sigma \; c, \mu \rangle 
+  &\rightarrow
+\langle t\left[f\right], \sigma, \mu\left[f \mapsto c \cdot l\right]\rangle f
+\not \in \textnormal{dom}\left(\mu\right)  \\
+\tag{App}
+\langle t \; t'\left[l\right], \sigma, \mu \rangle
+  &\rightarrow
+\langle t\left[l\right], \sigma \; t'\left[l\right], \mu \rangle \\
+\tag{Var1}
+\langle i\left[l\right], \sigma, \mu \rangle
+  &\rightarrow
+\langle c, \sigma \; l'', \mu \rangle
+\; \textnormal{where} \; l'' \mapsto c \cdot l' = \mu\left(l, i\right)
+\end{align*}
+\caption{Syntax and semantics of the $\mathcal{\mathcal{C} \mskip -4mu \mathcal{E}}$ machine.}
 \label{fig:cesm}
 \end{figure}
 

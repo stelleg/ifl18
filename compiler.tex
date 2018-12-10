@@ -5,14 +5,14 @@ de Bruijn indices to programs. The compiler proceeds by recursion on lambda
 terms, keeping a current index into the program to ensure correct linking
 without a separate pass. For variables, when we get to zero we push the current
 environment pointer and a null instruction pointer to denote the update marker
-to the location of the closure being entered. Then we \texttt{mov} the closure
-at that location into \texttt{R1} and \texttt{EP}, and \texttt{jump} to
-\texttt{R1}, recalling that the \texttt{jump} sets the \texttt{IP}. For 
-nonzero variables, we replicate traversing the environment pointer \texttt{i}
+to the location of the closure being entered. Then we \textit{mov} the closure
+at that location into \textit{r1} and \textit{ep}, and \textit{jump} to
+\textit{r1}, recalling that the \textit{jump} sets the \textit{ip}. For 
+nonzero variables, we replicate traversing the environment pointer \textit{i}
 times before loading the closure.  For applications, we calculate the program
 location of the argument basic block, and push that and the current environment
 pointer onto the stack, effectively pushing an argument closure on top of the
-stack. We then \texttt{jump} to the left hand side of the application, as is
+stack. We then \textit{jump} to the left hand side of the application, as is
 standard for push-enter evaluation. For abstractions, we use a conditional jump
 depending on whether the top of the stack is a null pointer (and therefore an
 update marker) or a valid instruction pointer (and therefore an argument). If it
@@ -21,7 +21,7 @@ with the current value instruction pointer and the current environment pointer.
 We must point to the first of the three abstractions basic blocks, as this value
 could later update another heap location as well. In the case that the top of
 the stack was a valid instruction pointer, we allocate a new chunk of 3 word of
-memory, and \texttt{mov} the argument closure into it, with the current
+memory, and \textit{mov} the argument closure into it, with the current
 environment pointer as the environment continuation. We then set our current
 environment pointer to this fresh location. This is the process by which we
 extend our shared environment structure in the instruction machine. Finally, we
@@ -30,45 +30,39 @@ block of the compiled body of the lambda. As this is an unconditional jump to
 the next basic block, for real machine code this jump can be omitted. 
 
 \begin{figure}
-\begin{lstlisting}
-Infix ";" := instr (at level 30, right associativity).
-
-Fixpoint var_inst (i : nat) : BasicBlock := match i with
-  | 0 => push EP ;
-         push (RC 0) ;
-         mov (EP%0) R1 ;
-         mov (EP%1) EP ;
-         jump None R1
-  | S i => mov (EP%2) EP ;
-           var_inst i
-  end.
-
-Fixpoint compile (t : tm) (k : nat) : Program := match t with
-  | var v => [var_inst v]
-  | app m n => let ms := compile m (1+k) in
-               let nk := 1+k+length ms in
-                push EP ;
-                push (RC nk) ;
-                jump None (RC (1+k)) ::
-                ms ++
-                compile n nk
-  | lam b => pop R1 ;
-             jump (Some (RW (WR R1), (1+k))) (RC (2+k)) ::
-             (*Update*)
-             pop R1 ;
-             mov (RC k) (R1%0) ;
-             mov EP (R1%1) ;
-             jump None (RC k) ::
-             (*Take*)
-             new 3 R2 ;
-             mov R1 (R2%0);
-             pop (R2%1) ;
-             mov EP (R2%2) ;
-             mov R2 EP ;
-             jump None (3+k) ::
-             compile b (3+k)
-  end. 
-\end{lstlisting}
+\begin{align*}
+var \; 0 &:= \\ 
+  &push \; ep : \\
+  &push \; 0 : \\
+  &mov \; ep\%0 \; r1 : \\
+  &mov \; ep\%1 \; ep : \\
+  &jump \; r1 \\
+var \; \left(i+1\right) &:= \\
+  &mov \; \left(ep\%2\right) \; ep : \\
+  &var \; i \\
+compile \; i \; k &:= \left[var \; i\right] \\
+compile \; \left( m \; n \right) \; k &:=  \\
+  &let \; ms = compile \; m \; \left(1+k\right) \; in \\
+  &let \; nk = 1+k+length \; ms \; in \\
+  &push \; ep :  \\
+  &push \; nk : \\
+  &jump \; k+1 :: \\
+  &ms ++ compile \; n \; nk \\
+compile \; \lambda b \; k &:=  \\
+  &pop \; r1 : \\
+  &jump \; \left( r1, k+1 \right) \; k+2 :: \\
+  &pop \; r1 : \\
+  &mov \; k \; r1\%0 : \\
+  &mov \; ep \; r1\%1 : \\
+  &jump \; k :: \\
+  &new \; 3 \; r2 : \\
+  &mov \; r1 \; r2\%0 : \\
+  &pop \; r2\%1 : \\
+  &mov \; ep \; r2\%2 : \\
+  &mov \; r2 \; ep : \\
+  &jump \; k+3 :: \\
+  &compile \; b \; k+3
+\end{align*}
 \caption{Compiler Definition}
 \label{fig:compiler}
 \end{figure}
