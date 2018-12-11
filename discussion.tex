@@ -49,7 +49,7 @@ design of our high level instruction machine would prevent such work.
 
 As a dual to the issue of a high level instruction machine language, some
 readers may take issue with calling lambda calculus with de Bruijn indices a
-"source language". Indeed, we do not advocate writing programs in such a
+"input language". Indeed, we do not advocate writing programs in such a
 language. Still, the conversion between lambda calculus with named variables and
 lambda calculus with de Bruijn indices is a well understood topic, it is not
 particularly interesting in the context of a verified compiler.  Indeed, as
@@ -113,17 +113,15 @@ operational properties is often likely to be easier in the context of the
 easy-to-reason-about high level semantics, and having that reasoning provably
 preserved would be extremely valuable. 
 
-Those familiar with Coq may have noticed that in general we operate in the
-\texttt{Type} universe instead of \texttt{Prop}. This is largely due to the
-desire to eventually do computation on the proof structures defined here,
-towards the goal of proving operational properties. For example, by operating on 
-the big-step relation data structure, one could compute time and space
-requirements for a program evaluation.
-
 Another exciting area of future work is powerful proofs of type preservation
 through compilation.  While there has been existing work on type-preserving
 compilers, fully verified compilers like this one provide such a strong property
 that type-safety should fall out directly.
+
+One useful feature of Coq is the ability to extract Coq programs out to other
+implementations, e.g. Haskell. This raises the possibility of extracting the
+verified compiler out to a Haskell implementation that could be incorporated
+into GHC, providing a path towards a verified Haskell compiler. 
 
 \subsection{Related Work}
 
@@ -150,4 +148,8 @@ strengthening their correctness theorem in the presence of nontermination. It's
 also worth noting that like \cite{leroy2012compcert}, they are also formalizing
 a frontend to the compiler. 
 
+As part of the DeepSpec project, Weirich et al. have been working on formalizing
+Haskell's core semantics \cite{weirich2017spec, spector2018total}. We believe
+there is opportunity to use this effort in combination with the DeepSpec project
+to implement and verify a full-featured Haskell compiler.
 

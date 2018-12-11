@@ -2,13 +2,13 @@
 Non-strict languages, such as Haskell, rely heavily on call-by-need semantics to
 ensure efficient execution. Without the memoization of results provided by
 call-by-need, Haskell would be prohibitively inefficient, often exponentially
-slower than its call-by-value counterparts. Haskell is one of the purest
-languages in wide use for software development, making reasoning about
-correctness in Haskell easier than most languages. It is for this reason that
-we would like to have a compiler that gives formal guarantees about preservation
-of call-by-need semantics. We wish to ensure that any reasoning we do about
-our non-strict functional programs is preserved through compilation, and that
-their execution will not be prohibitively inefficient.
+slower than its call-by-value counterparts. Thanks to careful restriction of
+side effects, reasoning about correctness in Haskell easier than most mainstream
+languages. It is for this reason that we would like to have a compiler that
+gives formal guarantees about preservation of call-by-need semantics. We wish to
+ensure that any reasoning we do about our non-strict functional programs is
+preserved through compilation, and that their execution will not be
+prohibitively inefficient.
 
 Unfortunately, one of the challenges for formalization of non-strict compilers
 is that the semantics of call-by-need abstract machines tend to be complex,

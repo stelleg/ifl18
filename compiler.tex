@@ -31,24 +31,24 @@ the next basic block, for real machine code this jump can be omitted.
 
 \begin{figure}
 \begin{align*}
-var \; 0 := 
+var \; 0 :=  \;
   &push \; ep : \\
   &push \; 0 : \\
   &mov \; \left(ep\%0\right) \; r1 : \\
   &mov \; \left(ep\%1\right) \; ep : \\
   &jump \; r1 \\
-var \; \left(i+1\right) :=
+var \; \left(i+1\right) := \;
   &mov \; \left(ep\%2\right) \; ep : \\
   &var \; i \\
-compile \; i \; k :=& \left[var \; i\right] \\
-compile \; \left( m \; n \right) \; k :=
+compile \; i \; k := \; & \left[var \; i\right] \\
+compile \; \left( m \; n \right) \; k := \;
   &let \; ms = compile \; m \; \left(k+1\right) \; in \\
   &let \; nk = 1+k+length \; ms \; in \\
   &push \; ep :  \\
   &push \; nk : \\
   &jump \; \left(k+1\right) :: \\
   &ms \concat compile \; n \; nk \\
-compile \; \left(\lambda b\right) \; k :=
+compile \; \left(\lambda b\right) \; k := \;
   &pop \; r1 : \\
   &jump \; \left(r1, k+1 \right) \; \left(k+2\right) :: \\
   &pop \; r1 : \\
