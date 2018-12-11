@@ -15,7 +15,7 @@ is that the semantics of call-by-need abstract machines tend to be complex,
 incorporating complex optimizations into the semantics, requiring preprocessing
 of terms, and closures of variable sizes \cite{jonesstg, TIM}. Recently we
 developed a particularly simple abstract machine for call-by-need, the
-$\mathcal{CE}$ machine \cite{cem}. In addition to being exceedingly simple to
+\ce machine \cite{cem}. In addition to being exceedingly simple to
 implement and reason about, the machine shows performance often comparable to
 state-of-the-art.
 
@@ -41,10 +41,10 @@ $\lambda$ calculus with de Bruijn indices:
  t &::= t \; t \; | \; x \; | \;  \lambda \; t \\
  x &\in \mathbb{N}
 \end{align*}
-Our source semantics is the big-step operational semantics of the $\mathcal{CE}$
+Our source semantics is the big-step operational semantics of the \ce 
 machine, which uses shared environments to share results between instances of a
 bound variable. To strengthen the result, and relate it to a better-known
-semantics, we also show that the call-by-name $\mathcal{CE}$ machine implements
+semantics, we also show that the call-by-name \ce machine implements
 Curien's call-by-name calculus of closures. 
 
 It may surprise the reader to see that we do not start with a better known
@@ -72,15 +72,15 @@ compiler of call-by-need.
 
 The paper is structured as follows. In Section~\ref{sec:background} we give the
 necessary background. In Section~\ref{sec:cem_big} we describe the source syntax
-and semantics (the big-step $\mathcal{CE}$ semantics) in detail.  We also use
+and semantics (the big-step \ce semantics) in detail.  We also use
 this section to define a call-by-name version of the semantics, and
 show that it implements Curien's calculus of closures \cite{curien1991abstract}.  In
-Section~\ref{sec:cem_small} we describe the small-step $\mathcal{CE}$ semantics
+Section~\ref{sec:cem_small} we describe the small-step \ce semantics
 and its relation to the big-step semantics. In Section~\ref{sec:im_semantics}
 we describe the instruction machine syntax and semantics. In
 Section~\ref{sec:compiler} we describe the compilation from machine terms to
 assembly language. In Section~\ref{sec:correctness} we describe how the evaluation
-of compiled programs is related to the small-step $\mathcal{CE}$ semantics. We
+of compiled programs is related to the small-step \ce semantics. We
 compose this proof with the proof that the small-step semantics implement the
 big-step semantics to show that the instruction machine implements the big-step
 semantics. In Section~\ref{sec:discussion} we discuss threats to validity,

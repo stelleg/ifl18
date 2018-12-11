@@ -1,4 +1,4 @@
-\section{$\mathcal{CE}$ Big-Step Semantics} \label{sec:cem_big}
+\section{\ce Big-Step Semantics} \label{sec:cem_big}
 
 In this section we define our big-step source semantics. A big-step semantics
 has the advantage of powerful, easy-to-use induction properties. This eases
@@ -16,13 +16,13 @@ between them and their binding lambda.
  x &\in \mathbb{N}
 \end{align*}
 
-The essence of the $\mathcal{CE}$ semantics is that we implement a shared
+The essence of the \ce semantics is that we implement a shared
 environment, and use its structure to share results of computations. This allows
 for a simple abstract machine which can operate on lambda calculus directly,
 which is uncommon among call-by-need abstract machines
 \cite{jonesstg,launchburynatural,TIM,johnsson1984efficient}. This simplifies
 formalization, as we do not need to prove that these transformations are
-semantics-preserving. Another advantage to the $\mathcal{CE}$ machine is that it
+semantics-preserving. Another advantage to the \ce machine is that it
 has constant sized closures, obviating the need to reason about re-allocating
 the results of computation and adding indirections due to closure size changes
 from thunk to value \cite{jonesstg}. We operate on closures, which combine terms with
@@ -89,7 +89,7 @@ relaxed to either allow reasoning about garbage collection or direct heap-reuse.
 \begin{align*}
 \tag{Abs} \inference {} {\left(\lambda t\left[l\right], \mu\right) \Downarrow \left(\lambda t\left[l\right], \mu\right)}
 \end{align*}
-\caption{Big Step $\mathcal{CE}$ Syntax and Semantics}
+\caption{Big Step \ce Syntax and Semantics}
 \label{fig:bigstep}
 \end{figure}
 
@@ -227,7 +227,7 @@ environment of Curien's semantics.
 \begin{align*}
 \tag{Abs} \inference {} {\left(\lambda t\left[l\right], \mu\right) \Downarrow \left(\lambda t\left[l\right], \mu\right)}
 \end{align*}
-\caption{Big Step Call-by-Name $\mathcal{CE}$ Syntax and Semantics}
+\caption{Big Step Call-by-Name \ce Syntax and Semantics}
 \label{fig:bigstepname}
 \end{figure}
 

@@ -18,7 +18,7 @@ Also perhaps unsurprisingly, call-by-need implementations tend to be more
 complicated than their strict counterparts. For example, even attempts at simple
 call-by-need abstract machines such as the Three Instruction Machine \cite{TIM}
 require lambda lifting and shared indirections, both of which make formal
-reasoning more difficult. Our $\mathcal{CE}$ machine avoids these complications
+reasoning more difficult. Our \ce machine avoids these complications
 by using shared environments to share evaluation results between instances of a
 variable. We showed in previous work that in addition to being simpler to
 implement and reason about, performance of this approach can often compete with
@@ -45,7 +45,7 @@ compiler is provably preserved.
 Due to the complexities discussed above involved in implementing lazy languages,
 existing work has focused on compiling strict languages
 \cite{chlipala2007certified, leroy2012compcert, cakeml14}. In this work we use
-the simple $\mathcal{CE}$ machine as a base for a verified compiler of a lazy
+the simple \ce machine as a base for a verified compiler of a lazy
 language, using the Coq proof assistant. 
 
 As with many areas of research, the devil is in the details. What exactly does
