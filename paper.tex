@@ -32,17 +32,17 @@ of Functional Languages}{September 2018}{Lowell, MA, USA}
       #1 \vfill}}
       %Poor man's typography
 \def\concat{\mathrel{\drawplusplus {8pt}{0.4pt}{5pt}}}
-\newtheorem{theorem}{Theorem}[section]
-\newtheorem{corollary}{Corollary}[theorem]
-\newtheorem{lemma}{Lemma}[theorem]
+\newtheorem{thm}{Theorem}
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{lem}[thm]{Lemma}
 \newenvironment{proofoutline}
  {\renewcommand\qedsymbol{}\proof[Proof outline]}
  {\endproof}
 \def\ce{$\mathcal{\mathcal{C} \mskip -4mu \mathcal{E}} \mskip 4mu$}
 
 \begin{abstract}
-Call-by-need semantics are widely used in the programming language Haskell.
-Unfortunately, unlike their call-by-value counterparts, there are no verified
+Call-by-need semantics underlies the widely used programming language Haskell.
+Unfortunately, unlike call-by-value counterparts, there are no verified
 compilers for call-by-need. In this paper we present the first verified compiler
 for call-by-need semantics. We use recent work on a simple call-by-need abstract
 machine as a way of reducing the formalization burden. We discuss some of the
@@ -82,7 +82,7 @@ difficulties in verifying call-by-need, and show how we overcome them.
 \author{Darko Stefanovic}
 \affiliation{
 %  \position{Professor and Chair}
-  \department{Computer Science}              %% \department is recommended
+  \department{Department of Computer Science}              %% \department is recommended
   \institution{University of New Mexico}            %% \institution is required
   \streetaddress{1 University of New Mexico}
   \city{Albuquerque}
@@ -90,7 +90,7 @@ difficulties in verifying call-by-need, and show how we overcome them.
   \postcode{87131}
   \country{United States}                    %% \country is recommended
 }
-\email{darko@unm.edu}          %% \email is recommended
+\email{darko@cs.unm.edu}          %% \email is recommended
 
 \maketitle
 

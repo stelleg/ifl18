@@ -39,21 +39,21 @@ approach turned out to be to use the structure of the heap constructs to define 
 one-to-three mapping between this single cell and the three machine words. The
 structure used for each of the heaps is a list of pointer, value bindings.
 We use the ordering of these bindings in the list to define a one binding to
-three binding mapping between the source heap and the machine heap. We define an
-analogue to the standard \texttt{In} list relation that defines when an element
-is in a list for this heap relation, proceeding recursively on the inductive
-relation structure. This allows us to define a notion of which pairs of each
-type of closure are in the heap, along with their respective locations. Due to
-the ordering in which they are allocated in the heap during evaluation, each pair of
-memory allocations corresponds to an equivalent cell. We use this property 
-as a heap equivalence property that is preserved through evaluation:
-every binding pair in the heap relation property described above defines
-equivalent closures and environment continuations. For the relation between our
-stacks, we define a similar notion. For update markers, we require that every
-update marker points to related environments (they are two pointers that exist
-in the heap relation). For argument closures, we require that the closures are
-equivalent (the instruction pointer and environment pointer are equivalent to
-their respective counterparts in the small-step semantics). 
+three binding mapping between the source heap and the machine heap. We define 
+a membership relation that defines when an element is in our heap relation,
+proceeding recursively on the inductive relation structure. This allows us to
+define a notion of which pairs of each type of closure are in the heap, along
+with their respective locations. Due to the ordering in which they are allocated
+in the heap during evaluation, each pair of memory allocations corresponds to an
+equivalent cell. We use this property as a heap equivalence property that is
+preserved through evaluation: every binding pair in the heap relation property
+described above defines equivalent closures and environment continuations. For
+the relation between our stacks, we define a similar notion.  For update
+markers, we require that every update marker points to related environments
+(they are two pointers that exist in the heap relation). For argument closures,
+we require that the closures are equivalent (the instruction pointer and
+environment pointer are equivalent to their respective counterparts in the
+small-step semantics). 
 
 In summary, we require that the current closure in the small-step semantics is
 equivalent to the closure represented by the instruction pointer, environment
@@ -79,9 +79,9 @@ induction hypothesis is invalid in the presence of the program. We then use the
 lemma to show that evaluation of a compiled variable implements the evaluation
 of the variable in the small-step semantics. In particular, we use the null
 environment as a base case for our induction, as we know the only way lookup
-could fail is if both environnment pointers are null, but that cannot be the
+could fail is if both environment pointers are null, but that cannot be the
 case due to the fact that we know that the small-step semantics must have
-succesfully looked up its environment pointer in the heap. Thefore the only
+successfully looked up its environment pointer in the heap. Therefore the only
 option is for both environment pointers to exist in the heap relation, which
 when combined with the heap equivalence relation in the outer proof gives us the
 necessary property that the environment continuations are equivalent. Finally,
@@ -120,7 +120,7 @@ We first require that the relation defined between the small-step semantics
 state and the instruction machine state holds for the initial configurations.
 This follows fairly directly from the definition of the initial conditions and
 the compile function. Second, we have by definition of reflexive transitive
-closure that the previous lemma implies that if the reflexive transitive
+closure that Lemma~\ref{lem:cesm_im} implies that if the reflexive transitive
 closure of the small-step relation evaluates in zero or more steps from a
 state $c$ to a state $v$, then a related state of the instruction machine $c'$
 will evaluate to a state $v'$ which is related to $v$. We use these two facts,

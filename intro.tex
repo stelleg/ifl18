@@ -3,12 +3,11 @@ Non-strict languages, such as Haskell, rely heavily on call-by-need semantics to
 ensure efficient execution. Without the memoization of results provided by
 call-by-need, Haskell would be prohibitively inefficient, often exponentially
 slower than its call-by-value counterparts. Thanks to careful restriction of
-side effects, reasoning about correctness in Haskell easier than most mainstream
+side effects, reasoning about correctness in Haskell is easier than most mainstream
 languages. It is for this reason that we would like to have a compiler that
 gives formal guarantees about preservation of call-by-need semantics. We wish to
 ensure that any reasoning we do about our non-strict functional programs is
-preserved through compilation, and that their execution will not be
-prohibitively inefficient.
+preserved through compilation.
 
 Unfortunately, one of the challenges for formalization of non-strict compilers
 is that the semantics of call-by-need abstract machines tend to be complex,
@@ -16,14 +15,14 @@ incorporating complex optimizations into the semantics, requiring preprocessing
 of terms, and closures of variable sizes \cite{jonesstg, TIM}. Recently we
 developed a particularly simple abstract machine for call-by-need, the
 \ce machine \cite{cem}. In addition to being exceedingly simple to
-implement and reason about, the machine shows performance often comparable to
+implement and reason about, the machine shows performance comparable to
 state-of-the-art.
 
 Verified compilers provide powerful guarantees about the code they generate and
 its relation to the corresponding source code \cite{chlipala2007certified,
 leroy2012compcert, cakeml14}.  In particular, for higher order functional
-languages, they can ensure that the non-trivial task of compiling lambda
-calculus and its derivatives to machine code is implemented correctly,
+languages, they ensure that the non-trivial task of compiling lambda
+calculus and its extensions to machine code is implemented correctly,
 preserving source semantics. The amortized return on investment for verified
 compilers is high: any reasoning about any program which is compiled with a
 verified compiler is provably preserved. 
@@ -52,8 +51,8 @@ call-by-need semantics; we address this concern in
 Section~\ref{sec:discussion}.  We hope that the proof of compiler correctness,
 along with the proof that our call-by-name version of the semantics implements
 Curien's call-by-name semantics, convinces the reader that we have indeed
-implemented a call-by-need semantics, despite not using a better definition of
-call-by-need. 
+implemented a call-by-need semantics, despite not using a better known
+definition of call-by-need. 
 
 For our target, we define a simple instruction machine, described in
 Section~\ref{sec:im_semantics}. This simple target allows us to describe the

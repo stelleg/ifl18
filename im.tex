@@ -6,12 +6,12 @@ instruction and heap memory). We use natural numbers for pointers, though it
 shouldn't be too difficult to replace these with standard-sized machine words,
 e.g., 64 bits, making the stack and malloc operations partial. Our stack is
 represented as a list of pointers, though again it should be a relatively
-straightforward exercise to represent the stack in main memory. With the fixed
+straightforward exercise to represent the stack in contiguous memory. With the fixed
 machine word size, we would need to make push operations partial to represent
 stacks this way. We define our machine to have only four registers: an
 instruction pointer, an environment pointer, and two scratch registers. Our
 instruction set is minimal, consisting only of a conditional jump instruction,
-pop and push instructions, a mov instruction, and a new instruction for
+pop and push instructions, a move instruction, and a new instruction for
 allocating new memory. Note that for our program memory, we have pointers to
 basic blocks, but for simplicity of proofs we choose to not increment the
 instruction pointer within a basic block.  Instead, the instruction pointer is
@@ -23,9 +23,9 @@ fairly unproblematic for formalization to a more realistic hardware design. The
 full syntax of the machine is given in Figure~\ref{fig:im_syntax}. Note that
 curly brackets $\left\{\right\}$ denote optionality, while stars $*$ denote zero
 or more elements, represented as a list. Note that we'll use some common list
-terminology, such as bracket notation for indexing, i.e. $l\left[i\right]$ accesses the
+terminology, such as bracket notation for indexing, i.e., $l\left[i\right]$ accesses the
 $i$'th element in $l$ (we don't worry about the partiality in this presentation
-of this operation, see the Coq implementation for a full treatment). We also use
+of this operation; see the Coq implementation for a full treatment). We also use
 $\concat$ for list concatenation, and $::$ for consing an element onto the head
 of a list. 
 

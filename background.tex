@@ -1,6 +1,6 @@
 \section{Background} \label{sec:background}
 
-Programming languages can roughly be broken into two camps: those with
+Programming languages fall roughly into two camps: those with
 \emph{strict} and those with \emph{non-strict} semantics. A strict language is
 one in which arguments at a call-site are always evaluated, while a non-strict
 language only evaluates arguments when they are needed. One can further break
@@ -21,37 +21,38 @@ require lambda lifting and shared indirections, both of which make formal
 reasoning more difficult. Our \ce machine avoids these complications
 by using shared environments to share evaluation results between instances of a
 variable. We showed in previous work that in addition to being simpler to
-implement and reason about, performance of this approach can often compete with
-the state of the art \cite{cem}. 
+implement and reason about, performance of this approach may be able compete
+with the state of the art \cite{cem}. 
 
 With recent improvements in higher order logics, machine verification of
 algorithms has become a valuable tool in software development. Instead of
-relying heavily on tests to reason about the correctness of programs,
-verification can prove that algorithms implement their specification for
-\emph{all} inputs. Having the ability to write down both the specification and
-the proof in a machine-checked logic removes the vast majority of bugs found in
-hand-written proofs, ensuring far higher confidence in correctness than other
-standard methods. Other approaches, such as fuzz testing, have confirmed that
-verified programs remove effectively all bugs \cite{yangfuzz}.
+relying heavily on tests to check the correctness of programs, verification can
+prove that algorithms implement their specification for \emph{all} inputs.
+Implementing both the specification and the proof in a machine-checked logic
+removes the vast majority of bugs found in hand-written proofs, ensuring far
+higher confidence in correctness than other standard methods. Other approaches,
+such as fuzz testing, have confirmed that verified programs remove effectively
+all bugs \cite{yangfuzz}.
 
 This approach applies particularly well to compilers. Often, the specification
-for a compiler is relatively easy to write down: source level semantics for some
-languages are exceedingly straightforward to specify. In addition, writing tests 
+for a compiler is complete: source level semantics for some languages are
+exceedingly straightforward to specify, and target architectures have lengthy
+specifications that are amenable to mechanization. In addition, writing tests
 for compilers that cover all cases is even more hopeless than most domains, due
 to the size and complexity of the domain and codomain. The amortized return on
-investment is high: all reasoning about programs compiled with a verified
+investment is also high: all reasoning about programs compiled with a verified
 compiler is provably preserved. 
 
 Due to the complexities discussed above involved in implementing lazy languages,
 existing work has focused on compiling strict languages
-\cite{chlipala2007certified, leroy2012compcert, cakeml14}. In this work we use
-the simple \ce machine as a base for a verified compiler of a lazy
-language, using the Coq proof assistant. 
+\cite{chlipala2007certified, leroy2012compcert, cakeml14}. Here we use the
+simple \ce machine as a base for a verified compiler of a lazy language, using
+the Coq proof assistant. 
 
 As with many areas of research, the devil is in the details. What exactly does
 it mean to claim a compiler is verified?  Essentially, a verified compiler of a
 functional language is one that preserves computation of values. That is, we
-have a one directional implication: \emph{if the source semantics computes a
+have an implication: \emph{if the source semantics computes a
 value, then the compiled code computes an equivalent value}
 \cite{chlipala2007certified}. The important thing to note is that the
 implication is only in one direction. If the source semantics never terminates,
@@ -65,7 +66,7 @@ semantics.
 While in theory one could solve this by proving the implication the other
 direction, that is, \emph{if the compiled code computes a value then the source
 semantics computes an equivalent value}, in practice this is prohibitively
-difficult. Essentially, the induction rules for the abstract machine make
+difficult. Effectively, the induction rules for the abstract machine make
 constructing such a proof monumentally tricky. 
 
 One approach for getting around this issue is to try and capture the divergent

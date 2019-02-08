@@ -27,8 +27,8 @@ There are a few potential threats to validity that we address in this section. T
 first is the one mentioned in Section~\ref{sec:background}, that we only show
 that our compiler is correct in the case of termination of the source semantics.
 In other words, if the source semantics doesn't terminate, we can say nothing
-about how the compiled code behaves. This means that we could in theory get
-termination when the source semantics never does. 
+about how the compiled code behaves. This means that we could have a compiled
+program that terminates when the source semantics does not terminate.
 
 One argument in defense of our verification is that \emph{we generally only care
 about preservation of semantics for preserving reasoning about our programs}. In
@@ -43,20 +43,20 @@ cases.
 Another potential threat to validity is the use of a high level instruction
 machine language. While we claim that its high level and simplicity should make
 it possible to show that a set of real ISAs implement this instruction machine,
-we haven't formally verified this step. We certainly agree that this would make
+we haven't formally verified this step. We believe that this would make
 for valuable future work, and hope that the reader agrees that nothing in the
 design of our high level instruction machine would prevent such work.
 
 As a dual to the issue of a high level instruction machine language, some
-readers may take issue with calling lambda calculus with de Bruijn indices a
+readers may take issue with calling lambda calculus with de Bruijn indices an
 "input language". Indeed, we do not advocate writing programs in such a
 language. Still, the conversion between lambda calculus with named variables and
-lambda calculus with de Bruijn indices is a well understood topic, it is not
-particularly interesting in the context of a verified compiler.  Indeed, as
-noted below, semantics using named variables and substitution can be
-hard to get right \cite{breitnerthesis, nakata2009small}, so we stand by our
-decision to use a semantics based on lambda calculus with de Bruijn
-indices. One potential approach for future work would be to prove that a
+lambda calculus with de Bruijn indices is a well understood topic, and we
+believe it would distract from the presentation of the verified compiler
+provided here. Indeed, as noted below, semantics using named variables and
+substitution can be hard to get right \cite{breitnerthesis, nakata2009small}, so
+we stand by our decision to use a semantics based on lambda calculus with de
+Bruijn indices. One potential approach for future work would be to prove that a
 call-by-name semantics using substitution is equivalent to Curien's calculus of
 closures, which when combined with a proof that our call-by-need implements our
 call-by-name, would prove the compiler implements the semantics of a standard
@@ -130,7 +130,7 @@ Chlipala implements a compiler from a STLC to a simple instruction machine in
 work: it converts to CPS, performs closure conversion, and proves a similar
 compiler correctness theorem to the one we've proved here. The primary
 difference is that we've defined a call-by-need compiler, which forces us to
-reason about updating thunks in the heap, a challenge not shared by
+reason about updating thunks in the heap, a challenge not faced by
 call-by-value implementations.
 
 Breitner formalizes Launchbury's natural semantics and proves an optimization is
@@ -146,7 +146,7 @@ machine model, and are working with a much larger real-world source language.
 They also make divergence arguments along the lines of \cite{functionalbigstep},
 strengthening their correctness theorem in the presence of nontermination. It's
 also worth noting that like \cite{leroy2012compcert}, they are also formalizing
-a frontend to the compiler. 
+a front end to the compiler. 
 
 As part of the DeepSpec project, Weirich et al. have been working on formalizing
 Haskell's core semantics \cite{weirich2017spec, spector2018total}. We believe
